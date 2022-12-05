@@ -39,7 +39,6 @@ def generate_solution(orders_list: List[Order], n_large_truck: int, n_small_truc
         while current_n_pallets > 0:
             hired_truck = randint(0,n_large_truck+n_small_truck-1)
             if hired_truck < n_small_truck:
-                truck_capacity =
                 n_pallets = randint(1,min(current_n_pallets,capacity_small))
             else:
                 n_pallets = randint(1, min(current_n_pallets, capacity_large))
@@ -48,7 +47,7 @@ def generate_solution(orders_list: List[Order], n_large_truck: int, n_small_truc
     return solution
 
 def main():
-    orders_lst = [Order(i+2, i, i*1000) for i in range(20)]
+    orders_lst = [Order(i+2, i % 15, i*1000) for i in range(30)]
     print("Order list:")
     print(orders_lst)
     print()
