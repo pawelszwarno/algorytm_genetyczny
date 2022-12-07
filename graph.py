@@ -7,6 +7,13 @@ class Graph:
         self.rows = rows
         self.cols = cols
         self.matrix = None
+        self.list_of_vertices = [i for i in range(self.rows)]
+        
+    def __repr__(self):
+        return self.matrix
+    
+    def __str__(self):
+        return '{}'.format(self.matrix)
 
     def create_adj_matrix(self, low_value, high_value):
         if self.matrix is None:
@@ -14,15 +21,5 @@ class Graph:
                 high=high_value, size=(self.rows, self.cols), low=low_value)
             self.matrix = np.maximum(
                 weighted_matrix, weighted_matrix.transpose())
-            # self.matrix = np.fill_diagonal(weighted_matrix_s, 0)
             for i in range(self.rows):
                 self.matrix[i][i] = 0
-
-def main():
-    g = Graph(10, 10)
-    g.create_adj_matrix(0, 10)
-    print(g.matrix)
-
-
-if __name__ == "__main__":
-    main()
