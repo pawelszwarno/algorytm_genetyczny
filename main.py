@@ -1,6 +1,6 @@
 from algorithm import generate_solution, crossing
 from classes import Order, Truck, TruckType, Graph
-from variables import n_pop
+from variables import n_population
 
 def main():
     # stworzenie grafu:
@@ -29,7 +29,7 @@ def main():
     # wygenerowanie początkowego rozwiązania i przedstawienie postaci rozwiązania:
     sol = None
     old_sol = None
-    for i in range(n_pop):
+    for i in range(n_population):
         print("Osobnik {}".format(i))
         old_sol = sol
         sol = generate_solution(trucks_list, orders_lst, n_large_trucks, n_small_trucks)
