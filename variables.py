@@ -8,7 +8,7 @@ capacity_s = 3
 
 n_population = 5
 n_iteration = 20
-r_cross =
-r_mutation = 
+r_cross = 0
+r_mutation = 0
 
 penalty_factor = 10
