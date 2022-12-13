@@ -1,10 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import numpy as np
+import pandas as pd
 from random import randint
 from random import choice
-from typing import List
 from enum import Enum
-SIMULATION_TIME = 720  # 30 dni - 30*24 = 720h
+import variables
+
 
 
 class TruckType(Enum):
@@ -30,7 +32,7 @@ class Order:
         # deadline dany jako losowa liczba godzin od czasu startwoego 0:
         # czyli np. deadline 32 znaczy 1 dzień i 8h po rozpoczęciu mięsiąca
         # naszego horyzontu czasowego.
-        self.deadline = randint(1, SIMULATION_TIME)
+        self.deadline = randint(1, variables.SIMULATION_TIME)
         self.__class__.unique += 1
 
     def __repr__(self):
@@ -59,11 +61,11 @@ class Truck:
         self.type = type
         self.index = self.unique
         if type == TruckType.SMALL:
-            self.speed = 5
-            self.capacity = 4
+            self.speed = variables.speed_s
+            self.capacity = variables.capacity_s
         elif type == TruckType.LARGE:
-            self.speed = 3
-            self.capacity = 7
+            self.speed = variables.speed_l
+            self.capacity = variables.capacity_l
         self.__class__.unique += 1
 
     def __repr__(self):
@@ -71,22 +73,26 @@ class Truck:
     
     def __str__(self):
         return f'(ID: {self.index}; type: {self.type})'
-    
 
-def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[List[SolutionTuple]]:
-    solution = [[] for _ in range(n_large_truck+n_small_truck)]
-    for order in orders_list:
-        current_n_pallets = order.n_pallets
-        while current_n_pallets > 0:
-            hired_truck = choice(trucks_list)
-            n_pallets = randint(1, current_n_pallets)
-            if solution[hired_truck.index]:
-                last_order = solution[hired_truck.index][-1]
-                if last_order.n_order == order.index:
-                    solution[hired_truck.index][-1] = SolutionTuple(order.index, n_pallets+last_order.n_pallets)
-                else:
-                    solution[hired_truck.index].append(SolutionTuple(order.index, n_pallets))
-            else:
-                solution[hired_truck.index].append(SolutionTuple(order.index, n_pallets))
-            current_n_pallets -= n_pallets
-    return solution
+
+class Graph:
+    def __init__(self, rows, cols):
+        self.rows = rows
+        self.cols = cols
+        self.matrix = None
+        self.list_of_vertices = [i for i in range(self.rows)]
+        
+    def __repr__(self):
+        return self.matrix
+    
+    def __str__(self):
+        return '{}'.format(self.matrix)
+
+    def create_adj_matrix(self, low_value, high_value):
+        if self.matrix is None:
+            weighted_matrix = np.random.randint(
+                high=high_value, size=(self.rows, self.cols), low=low_value)
+            self.matrix = np.maximum(
+                weighted_matrix, weighted_matrix.transpose())
+            for i in range(self.rows):
+                self.matrix[i][i] = 0

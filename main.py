@@ -1,8 +1,6 @@
-from graph import Graph
-from generate_solution import generate_solution
-from generate_solution import Order
-from generate_solution import Truck, TruckType
-
+from algorithm import generate_solution
+from classes import Order, Truck, TruckType, Graph
+from variables import n_pop
 
 def main():
     # stworzenie grafu:
@@ -29,9 +27,13 @@ def main():
     # pojemność małych ciężarówek, pojemność dużych ciężarówek
     
     # wygenerowanie początkowego rozwiązania i przedstawienie postaci rozwiązania:
-    sol = generate_solution(trucks_list, orders_lst, n_large_trucks, n_small_trucks)
-    for truck in trucks_list:
-        print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol[truck.index]))
+    
+    for i in range(n_pop):
+        print("Osobnik {}".format(i))
+        sol = generate_solution(trucks_list, orders_lst, n_large_trucks, n_small_trucks)
+        for truck in trucks_list:
+            print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol[truck.index]))
+        
 
 if __name__ == "__main__":
     main()
