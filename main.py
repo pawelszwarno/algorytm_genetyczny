@@ -1,7 +1,7 @@
 from graph import Graph
 from generate_solution import generate_solution
 from generate_solution import Order
-from generate_solution import Truck
+from generate_solution import Truck, TruckType
 
 
 def main():
@@ -14,9 +14,9 @@ def main():
     # stworzenie listy ciężarówek:
     n_small_trucks = 7
     n_large_trucks = 6
-    trucks_list = [Truck('small') for _ in range(n_small_trucks)]
+    trucks_list = [Truck(TruckType.SMALL) for _ in range(n_small_trucks)]
     for _ in range(n_large_trucks):
-        trucks_list.append(Truck('large'))
+        trucks_list.append(Truck(TruckType.LARGE))
     print("Lista ciężarówek: (Index, typ)")
     print(trucks_list, '\n')
     
@@ -29,7 +29,7 @@ def main():
     # pojemność małych ciężarówek, pojemność dużych ciężarówek
     
     # wygenerowanie początkowego rozwiązania i przedstawienie postaci rozwiązania:
-    sol = generate_solution(trucks_list, orders_lst, n_large_trucks, n_small_trucks, Truck('small').capacity, Truck('large').capacity)
+    sol = generate_solution(trucks_list, orders_lst, n_large_trucks, n_small_trucks)
     for truck in trucks_list:
         print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol[truck.index]))
 
