@@ -69,6 +69,7 @@ class Truck:
             self.capacity = variables.capacity_l
         self.__class__.unique += 1
         self.current_time = 0
+        self.current_capacity = self.capacity
 
     def __repr__(self):
         return f'(ID: {self.index}; type: {self.type})'
