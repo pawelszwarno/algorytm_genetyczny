@@ -1,7 +1,8 @@
-from classes import Order, Truck, SolutionTuple
+from classes import Order, Truck, SolutionTuple, Graph
 from typing import List
 from random import randint
 from random import choice
+from variables import penalty_factor
 
 
 # TO DO
@@ -24,8 +25,21 @@ def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_larg
     return solution
 
 
-def objective_function(solution):
-    pass
+def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, truck_list: List[Truck], order_list: List[Order]):
+    cost = 0
+    for truck_idx, truck_route in enumerate(solution):
+        prev_order = truck_route[0]
+        for curr_order in truck_route:
+            while curr_order.n_pallets > 0:
+                distance = cost_graph.matrix[curr_order.n_order, prev_order.n_order]
+                time = distance/truck_list[truck_idx].speed
+                truck_list[truck_idx].add_time(time)
+                delivery_time = truck_list[truck_idx].current_time
+                if delivery_time > order_list[curr_order.n_order].deadline:
+                    penalty = penalty_factor * (delivery_time - order_list[curr_order.n_order].deadline)
+                    cost += penalty
+                prev_order = curr_order
+    return cost
 
 
 def mutation():

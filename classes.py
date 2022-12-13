@@ -44,6 +44,7 @@ class Order:
 
 class SolutionTuple:
     def __init__(self,n_order,n_pallets):
+        # TODO: zamień n_order na zamówienie
         self.n_order = n_order
         self.n_pallets = n_pallets
 
@@ -67,12 +68,16 @@ class Truck:
             self.speed = variables.speed_l
             self.capacity = variables.capacity_l
         self.__class__.unique += 1
+        self.current_time = 0
 
     def __repr__(self):
         return f'(ID: {self.index}; type: {self.type})'
     
     def __str__(self):
         return f'(ID: {self.index}; type: {self.type})'
+
+    def add_time(self,time):
+        self.current_time += time
 
 
 class Graph:

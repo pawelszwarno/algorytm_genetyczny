@@ -7,3 +7,5 @@ speed_s = 7
 capacity_s = 3
 
 n_pop = 5
+
+penalty_factor = 10
