@@ -1,4 +1,4 @@
-from algorithm import generate_solution
+from algorithm import generate_solution, crossing
 from classes import Order, Truck, TruckType, Graph
 from variables import n_pop
 
@@ -27,13 +27,19 @@ def main():
     # pojemność małych ciężarówek, pojemność dużych ciężarówek
     
     # wygenerowanie początkowego rozwiązania i przedstawienie postaci rozwiązania:
-    
+    sol = None
+    old_sol = None
     for i in range(n_pop):
         print("Osobnik {}".format(i))
+        old_sol = sol
         sol = generate_solution(trucks_list, orders_lst, n_large_trucks, n_small_trucks)
         for truck in trucks_list:
             print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol[truck.index]))
-        
+
+    print("Crossing:")
+    cross = crossing(old_sol, sol, 10)
+    for truck in trucks_list:
+        print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, cross[truck.index]))
 
 if __name__ == "__main__":
     main()
