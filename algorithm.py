@@ -85,3 +85,4 @@ def algorithm(n_population: int, n_iteration: int , r_cross: float, r_mutation: 
 def selection_rank(population, scores):
 
     pass
+
