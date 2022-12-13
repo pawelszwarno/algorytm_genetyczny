@@ -34,12 +34,16 @@ class Order:
         # naszego horyzontu czasowego.
         self.deadline = randint(1, variables.SIMULATION_TIME)
         self.__class__.unique += 1
+        self.missing_pallets = self.n_pallets
 
     def __repr__(self):
         return f'(id={self.index}, v={self.vertex}, n_p={self.n_pallets}, dl={self.deadline})'
 
     def __str__(self):
         return f'(id={self.index}, v={self.vertex}, n_p={self.n_pallets})'
+
+    def deliver_pallets(self, delivered):
+        self.missing_pallets -= delivered
 
 
 class SolutionTuple:
@@ -59,6 +63,7 @@ class Truck:
     unique = 0
     
     def __init__(self, type: TruckType):
+        # TODO: Dodaj pamiętanie pozycji przez ciężarówkę
         self.type = type
         self.index = self.unique
         if type == TruckType.SMALL:
@@ -79,6 +84,14 @@ class Truck:
 
     def add_time(self,time):
         self.current_time += time
+
+    def deliver_pallets(self, delivered):
+        self.current_capacity -= delivered
+
+    def refill(self, distance_to_base):
+        time = distance_to_base/self.speed
+        self.add_time(time)
+        self.current_capacity = self.capacity
 
 
 class Graph:

@@ -31,13 +31,24 @@ def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, t
         prev_order = truck_route[0]
         for curr_order in truck_route:
             while curr_order.n_pallets > 0:
+                curr_truck = truck_list[truck_idx]
                 distance = cost_graph.matrix[curr_order.n_order, prev_order.n_order]
-                time = distance/truck_list[truck_idx].speed
-                truck_list[truck_idx].add_time(time)
-                delivery_time = truck_list[truck_idx].current_time
+                time = distance/curr_truck.speed
+                curr_truck.add_time(time)
+                delivery_time = curr_truck.current_time
+
+                delivered_pallets = min(curr_truck.current_capacity, curr_order.n_pallets)
+                order_list[curr_order.n_order].deliver_pallets(delivered_pallets)
+                curr_order.n_pallets -= delivered_pallets
+                curr_truck.deliver_pallets(delivered_pallets)
+
                 if delivery_time > order_list[curr_order.n_order].deadline:
-                    penalty = penalty_factor * (delivery_time - order_list[curr_order.n_order].deadline)
+                    penalty = penalty_factor * (delivery_time - order_list[curr_order.n_order].deadline) * (order_list[curr_order.n_order].missing_pallets + delivered_pallets)
                     cost += penalty
+
+                if curr_truck.current_capacity == 0:
+                    curr_truck.refill(distance_to_base=cost_graph.matrix[curr_order.n_order, 0])
+
                 prev_order = curr_order
     return cost
 
