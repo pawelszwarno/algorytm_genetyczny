@@ -1,7 +1,6 @@
 from classes import Order, Truck, SolutionTuple, Graph
 from typing import List
-from random import randint
-from random import choice
+from random import randint, choice, shuffle, random
 from variables import penalty_factor
 
 
@@ -52,10 +51,30 @@ def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, t
                 prev_order = curr_order
     return cost
 
-
-def mutation():
-    pass
-
+# funkcja mutacji wariant 1: zamiana kolejności w trasie losowej ilości ciężarówek 
+def mutation(new_sol: List[List[SolutionTuple]], truck_list: List[Truck], r_mut = 1.0):
+    rand_float = random()
+    # jesli prawdopodobieństwo niższe niż threshold to zwracamy bez zmian
+    if rand_float > r_mut:
+        return new_sol
+    else:
+        # jesli ma dojsc do mutacji to losujemy liczbe od 1 do maks liczby ciężarówek
+        n_of_trucks_to_mut = randint(1, len(truck_list))
+        # print("DO MUTACJI {}".format(n_of_trucks_to_mut))
+        new_truck_list = truck_list.copy()
+        shuffle(new_truck_list)
+        # bierzemy tylko n_of_trucks_to_mut z losowych tras ciężarówek
+        for i in range(n_of_trucks_to_mut):
+            truck_id_to_mut = new_truck_list[i].index
+            left_swap = randint(0, len(new_sol[truck_id_to_mut]) - 1)
+            right_swap = randint(0, len(new_sol[truck_id_to_mut]) - 1)
+            temp = new_sol[truck_id_to_mut][left_swap]
+            new_sol[truck_id_to_mut][left_swap] = new_sol[truck_id_to_mut][right_swap]
+            new_sol[truck_id_to_mut][right_swap] = temp
+        return new_sol
+            
+            
+            
 
 def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int):
     new_sol = [[] for _ in range(len(parent_1))]
