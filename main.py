@@ -1,4 +1,4 @@
-from algorithm import generate_solution, crossing
+from algorithm import generate_solution, crossing, mutation
 from classes import Order, Truck, TruckType, Graph
 from variables import n_pop
 
@@ -37,9 +37,14 @@ def main():
             print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol[truck.index]))
 
     print("Crossing:")
-    cross = crossing(old_sol, sol, 10)
+    sol_po_crossingu = crossing(old_sol, sol, 10)
     for truck in trucks_list:
-        print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, cross[truck.index]))
+        print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol_po_crossingu[truck.index]))
 
+    print("Test mutacji: ")
+    sol_po_mutacji = mutation(sol_po_crossingu, trucks_list)
+    for truck in trucks_list:
+        print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol_po_mutacji[truck.index]))
+        
 if __name__ == "__main__":
     main()
