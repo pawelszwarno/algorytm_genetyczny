@@ -1,36 +1,43 @@
 from classes import Order, Truck, SolutionTuple, Graph, TruckType
 from typing import List
 from random import randint, choice, shuffle, random
-from variables import penalty_factor, n_small_trucks, n_large_trucks
+from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop
 
 # TO DO
-def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[List[SolutionTuple]]:
-    solution = [[] for _ in range(n_large_truck+n_small_truck)]
-    for order in orders_list:
-        current_n_pallets = order.n_pallets
-        while current_n_pallets > 0:
-            hired_truck = choice(trucks_list)
-            n_pallets = randint(1, current_n_pallets)
-            if solution[hired_truck.index]:
-                last_order = solution[hired_truck.index][-1]
-                if last_order.n_order == order.index:
-                    solution[hired_truck.index][-1] = SolutionTuple(order.index, n_pallets+last_order.n_pallets)
+def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[List[List[SolutionTuple]]]:
+    population = []
+    for _ in range(n_pop):
+        solution = [[] for _ in range(n_large_truck+n_small_truck)]
+        for order in orders_list:
+            current_n_pallets = order.n_pallets
+            while current_n_pallets > 0:
+                hired_truck = choice(trucks_list)
+                n_pallets = randint(1, current_n_pallets)
+                if solution[hired_truck.index]:
+                    last_order = solution[hired_truck.index][-1]
+                    if last_order.n_order == order.index:
+                        solution[hired_truck.index][-1] = SolutionTuple(order.index, n_pallets+last_order.n_pallets)
+                    else:
+                        solution[hired_truck.index].append(SolutionTuple(order.index, n_pallets))
                 else:
                     solution[hired_truck.index].append(SolutionTuple(order.index, n_pallets))
-            else:
-                solution[hired_truck.index].append(SolutionTuple(order.index, n_pallets))
-            current_n_pallets -= n_pallets
-    return solution
+                current_n_pallets -= n_pallets
+        population.append(solution)
+    return population
 
 
+#TODO uwzględnienie wariantu crossingu z karami:
 def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, truck_list: List[Truck], order_list: List[Order]):
     cost = 0
     for truck_idx, truck_route in enumerate(solution):
-        prev_order = truck_route[0]
+        prev_order = None
         for curr_order in truck_route:
             while curr_order.n_pallets > 0:
                 curr_truck = truck_list[truck_idx]
-                distance = cost_graph.matrix[curr_order.n_order, prev_order.n_order]
+                if prev_order is None:
+                    distance = cost_graph.matrix[order_list[curr_order.n_order].vertex, order_list[curr_order.n_order].vertex]
+                else:
+                    distance = cost_graph.matrix[order_list[curr_order.n_order].vertex, order_list[prev_order.n_order].vertex]
                 time = distance/curr_truck.speed
                 curr_truck.add_time(time)
                 delivery_time = curr_truck.current_time
@@ -42,10 +49,10 @@ def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, t
 
                 if delivery_time > order_list[curr_order.n_order].deadline:
                     penalty = penalty_factor * (delivery_time - order_list[curr_order.n_order].deadline) * (order_list[curr_order.n_order].missing_pallets + delivered_pallets)
-                    cost += penalty
+                    cost -= penalty
 
                 if curr_truck.current_capacity == 0:
-                    curr_truck.refill(distance_to_base=cost_graph.matrix[curr_order.n_order, 0])
+                    curr_truck.refill(distance_to_base=cost_graph.matrix[order_list[curr_order.n_order].vertex, order_list[curr_order.n_order].vertex])
 
                 prev_order = curr_order
     return cost
@@ -74,6 +81,7 @@ def mutation(new_sol: List[List[SolutionTuple]], truck_list: List[Truck], r_mut 
         return new_sol
             
 
+#TODO: wariant następny crossingu z rozwiązaniami niedopuszczalnymi 
 def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int):
     new_sol = [[] for _ in range(len(parent_1))]
     for idx, truck_route in enumerate(parent_1):
@@ -91,8 +99,8 @@ def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTu
                 new_sol[idx].append(sol)
     return new_sol
 
-
-def selection_rank(population, scores, n_population):
+#TODO: do zmiany na ruletke:
+def selection_rank(population, scores):
     sel_lst = []
     
     for ix in range(len(population)):
@@ -100,9 +108,9 @@ def selection_rank(population, scores, n_population):
             sel_lst.append((population[ix],scores[ix]))
 
         if scores[ix] > sel_lst[-1][1]:
-            if len(sel_lst) >= n_population:
+            if len(sel_lst) >= n_pop:
                 sel_lst[-1] = (population[ix],scores[ix])
-            elif len(sel_lst) < n_population:
+            elif len(sel_lst) < n_pop:
                 sel_lst.append((population[ix],scores[ix]))
         sel_lst.sort(reverse = 1, key = lambda x: x[1])
     
@@ -131,21 +139,23 @@ def create_structures(rows_cols: int, low_adj_matrix, high_adj_matrix: float, n_
     # pojemność małych ciężarówek, pojemność dużych ciężarówek
     return g, trucks_list, orders_lst
     
-    
-def algorithm(n_population: int, n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph):
+
+#TODO: do dodania rodzice do nastepnego pokolenia:
+def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph):
     children = []
     population = generate_solution(truck_list, order_lst, n_large_trucks, n_small_trucks)
-    best, best_eval = population, objective_function(population, g, truck_list, order_lst)
-    for generation in range(n_iteration):
-        scores = [objective_function(child, g, truck_list, order_lst) for child in population]
-        for i in range(n_population):
-            if scores[i] < best_eval:
-                best, best_eval = population[i], scores[i]
-        selected = selection_rank(population, scores)
-        for i in range(0, n_population, 2):
-            parent_1, parent_2 = selected[i], selected[i+1]
+    best, best_eval = population[0], objective_function(population[0], g, truck_list, order_lst)
+    for j in range(n_iteration):
+        scores = [(osobnik_id, objective_function(osobnik, g, truck_list, order_lst)) for osobnik_id, osobnik in enumerate(population)]
+        scores.sort(key = lambda x: x[1])
+        print(scores)
+        selected = scores[0:len(population)]
+        # print(len(selected))
+        for i in range(0, len(selected)-1, 2):
+            print(j)
+            parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
             for child in crossing(parent_1, parent_2, r_cross):
-                mutation(child, r_mutation)
+                mutation(child, truck_list, r_mutation)
                 children.append(child)
         population = children
     return best, best_eval

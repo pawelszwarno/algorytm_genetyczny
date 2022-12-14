@@ -28,7 +28,7 @@ def main():
     n_iteration = 100
     r_cross = 3
     r_mutation = 1
-    print(algorithm(n_pop, n_iteration, r_cross, r_mutation, trucks_list, orders_lst, g))
+    algorithm(n_iteration, r_cross, r_mutation, trucks_list, orders_lst, g)
         
         
     

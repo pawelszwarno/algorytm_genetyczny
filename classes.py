@@ -28,7 +28,6 @@ class Order:
             self.vertex = choice(graph.list_of_vertices)
         else:
             self.vertex = vertex
-
         # deadline dany jako losowa liczba godzin od czasu startwoego 0:
         # czyli np. deadline 32 znaczy 1 dzień i 8h po rozpoczęciu mięsiąca
         # naszego horyzontu czasowego.
@@ -114,4 +113,5 @@ class Graph:
             self.matrix = np.maximum(
                 weighted_matrix, weighted_matrix.transpose())
             for i in range(self.rows):
-                self.matrix[i][i] = 0
+                #TODO: zmiana diagonalnych wartośći na odległość od bazy
+                self.matrix[i][i] = 10
