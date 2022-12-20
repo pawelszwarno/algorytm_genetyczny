@@ -1,7 +1,7 @@
 from classes import Order, Truck, SolutionTuple, Graph, TruckType
 from typing import List
 from random import randint, choice, shuffle, random
-from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME
+from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME, parent_percent
 from copy import deepcopy
 
 # TO DO
@@ -165,7 +165,61 @@ def selection(population_scores: List[tuple[int, int]], population_size: int):
     population_scores.sort(key = lambda x: x[1])
     selected = population_scores[0:population_size]
     return selected
- 
+
+def selection_rank():
+    pass
+
+def selection_tour(population_score: List[tuple[int, int]] = None, population_size: int =None):
+    
+    selected = []
+    
+    if len(population_score) < population_size:
+        raise ValueError
+
+    if (len(population_score)%2) != 0:  
+        selected.append(population_score[len(population_score)%2])
+    for i in range(int(len(population_score)/2)):
+        if population_score[i][1] >= population_score[-1-i][1]:
+            selected.append(population_score[i])
+        elif population_score[i][1] <= population_score[-1-i][1]:
+            selected.append(population_score[-1-i])
+    if len(selected) < population_size:
+        pass
+    elif len(selected) == population_size:
+        return selected
+    elif len(selected) > population_size:
+        return selection_tour(selected, population_size)
+
+def selection_prop(population_score: List[tuple[int, int]] = None, population_size: int =None):
+
+    selected = []
+    pop_edited = [population_score[0]]
+    
+    if len(population_score) < population_size:
+        raise ValueError
+
+    for i in range(1,len(population_score)):
+        temp = pop_edited[i-1][1] + population_score[i][1]
+        pop_edited.append((population_score[i][0], temp))
+    
+    while len(selected) != population_size:
+        select = randint(1, pop_edited[-1][1])
+
+        for i in range(len(pop_edited)):
+            if select <= pop_edited[i][1]:
+                if population_score[i] not in selected:
+                    selected.append(population_score[i])
+        return selected
+
+    
+
+
+
+
+    
+a = [(1,11),(2,22),(3,33),(5,55),(4,44),(6,66)] 
+npop= 4
+print(selection_prop(a, npop))
     
 #TODO: do dodania rodzice do nastepnego pokolenia:
 def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph):
@@ -190,7 +244,15 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
                 new_child = mutation(child, truck_list, r_mutation)
                 children.append(new_child)
                 children.append(choice([parent_1, parent_2]))
-            population = children
+            new_population = children
+            population_sort = (population, population_scores)
+            # population_sort = population_sort.sort(key = lambda x: x[1])
+            # population_sort = slice(len(population_sort)*parent_percent/100)
+            slice_par = slice(3)
+            print (population_sort[slice_par])
+
+
+        
     return best, best_eval
 
 

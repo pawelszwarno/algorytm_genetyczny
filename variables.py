@@ -11,3 +11,5 @@ n_pop = 1000
 
 n_iteration = 100
 penalty_factor = 10
+
+parent_percent = 50 #procent rodziców przekazywany do następnej populacji 0-100%
