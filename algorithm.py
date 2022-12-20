@@ -1,7 +1,7 @@
 from classes import Order, Truck, SolutionTuple, Graph, TruckType
 from typing import List
 from random import randint, choice, shuffle, random
-from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop
+from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME
 from copy import deepcopy
 
 # TO DO
@@ -27,35 +27,44 @@ def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_larg
     return population
 
 
-#TODO uwzględnienie wariantu crossingu z karami:
-def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, truck_list: List[Truck], order_list: List[Order]):
+def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, truck_list: List[Truck], order_list: List[Order], uncomplete_sol=True):
     cost = 0
+    if uncomplete_sol:
+        delivered_pallets_in_order = [0 for _ in range(len(order_list))]
     for truck_idx, truck_route in enumerate(solution):
-        prev_order = None
+        prev_order_nr = None
         for curr_order in truck_route:
-            while order_list[curr_order.n_order].missing_pallets > 0:
+            curr_order_info = order_list[curr_order.n_order]
+            missing_pallets = curr_order.n_pallets
+            while missing_pallets > 0:
                 curr_truck = truck_list[truck_idx]
-                if prev_order is None:
-                    distance = cost_graph.matrix[order_list[curr_order.n_order].vertex, order_list[curr_order.n_order].vertex]
+                if prev_order_nr is None:
+                    distance = cost_graph.matrix[curr_order_info.vertex, curr_order_info.vertex]
                 else:
-                    distance = cost_graph.matrix[order_list[curr_order.n_order].vertex, order_list[prev_order.n_order].vertex]
-                time = distance/curr_truck.speed
-                curr_truck.add_time(time)
+                    distance = cost_graph.matrix[curr_order_info.vertex, order_list[prev_order_nr].vertex]
+
+                delivered_pallets = min(curr_truck.current_capacity, missing_pallets)
+                missing_pallets -= delivered_pallets
+                if uncomplete_sol:
+                    delivered_pallets_in_order[curr_order.n_order] += delivered_pallets
+                    
+                curr_truck.deliver_pallets(delivered_pallets, curr_order_info.vertex, distance)
                 delivery_time = curr_truck.current_time
 
-                delivered_pallets = min(curr_truck.current_capacity, curr_order.n_pallets)
-                order_list[curr_order.n_order].deliver_pallets(delivered_pallets)
-                # curr_order.n_pallets -= delivered_pallets
-                curr_truck.deliver_pallets(delivered_pallets)
-
-                if delivery_time > order_list[curr_order.n_order].deadline:
-                    penalty = penalty_factor * (delivery_time - order_list[curr_order.n_order].deadline) * (order_list[curr_order.n_order].missing_pallets + delivered_pallets)
+                if delivery_time > curr_order_info.deadline:
+                    penalty = penalty_factor * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
                     cost += penalty
 
                 if curr_truck.current_capacity == 0:
-                    curr_truck.refill(distance_to_base=cost_graph.matrix[order_list[curr_order.n_order].vertex, order_list[curr_order.n_order].vertex])
+                    curr_truck.refill(distance_to_base=cost_graph.matrix[curr_truck.current_pos, curr_truck.current_pos])
 
-                prev_order = curr_order
+                prev_order_nr = curr_order.n_order
+    
+    if uncomplete_sol:
+        for idx, pallets in enumerate(delivered_pallets_in_order):
+            penalty = penalty_factor*10 * SIMULATION_TIME * (order_list[idx].n_pallets - pallets)
+            cost += penalty
+                
     return cost
 
 
@@ -145,7 +154,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
     children = []
     population = generate_solution(truck_list, order_lst, n_large_trucks, n_small_trucks)
     print(population[0])
-    best, best_eval = population[0], objective_function(population[0], g, truck_list, order_lst)
+    best, best_eval = population[0], objective_function(population[0], g, truck_list, order_lst, uncomplete_sol=False)
     for _ in range(n_iteration):
         if len(population) < 3:
             break
