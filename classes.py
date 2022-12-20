@@ -33,16 +33,12 @@ class Order:
         # naszego horyzontu czasowego.
         self.deadline = randint(1, variables.SIMULATION_TIME)
         self.__class__.unique += 1
-        self.missing_pallets = self.n_pallets
 
     def __repr__(self):
         return f'(id={self.index}, v={self.vertex}, n_p={self.n_pallets}, dl={self.deadline})'
 
     def __str__(self):
         return f'(id={self.index}, v={self.vertex}, n_p={self.n_pallets})'
-
-    def deliver_pallets(self, delivered):
-        self.missing_pallets -= delivered
 
 
 class SolutionTuple:
@@ -74,6 +70,7 @@ class Truck:
         self.__class__.unique += 1
         self.current_time = 0
         self.current_capacity = self.capacity
+        self.current_pos = 0
 
     def __repr__(self):
         return f'(ID: {self.index}; type: {self.type})'
@@ -84,13 +81,17 @@ class Truck:
     def add_time(self,time):
         self.current_time += time
 
-    def deliver_pallets(self, delivered):
+    def deliver_pallets(self, delivered, vertex, distance):
+        time = distance/self.speed
+        self.add_time(time)
         self.current_capacity -= delivered
+        self.current_pos = vertex
 
     def refill(self, distance_to_base):
         time = distance_to_base/self.speed
         self.add_time(time)
         self.current_capacity = self.capacity
+        self.current_pos = 0
 
 
 class Graph:
