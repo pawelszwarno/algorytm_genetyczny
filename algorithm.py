@@ -93,9 +93,27 @@ def mutation(new_sol: List[List[SolutionTuple]], truck_list: List[Truck], r_mut 
                 new_sol[truck_id_to_mut][right_swap] = temp
         return new_sol
             
+def crossing_with_possibly_uncomplete(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int, possibly_uncomplete: bool=False):
+    new_sol = [[] for _ in range(len(parent_1))]
+    for idx, truck_route in enumerate(parent_1):
+        for idx_2, sol in enumerate(truck_route):
+            if idx_2 < r_cross:
+                new_sol[idx].append(sol)
+            else:
+                break
 
-#TODO: wariant następny crossingu z rozwiązaniami niedopuszczalnymi 
-def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int):
+    for idx, truck_route in enumerate(parent_2):
+        for idx_2, sol in enumerate(truck_route):
+            if sol.n_order < r_cross:
+                continue
+            else:
+                new_sol[idx].append(sol)
+    return new_sol
+    
+
+def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int, possibly_uncomplete: bool=False):
+    if possibly_uncomplete:
+        return crossing_with_possibly_uncomplete(parent_1, parent_2, r_cross)
     new_sol = [[] for _ in range(len(parent_1))]
     for idx, truck_route in enumerate(parent_1):
         for sol in truck_route:
