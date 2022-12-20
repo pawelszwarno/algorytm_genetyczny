@@ -120,7 +120,7 @@ def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTu
             if sol.n_order < r_cross:
                 new_sol[idx].append(sol)
             else:
-                break
+                continue
 
     for idx, truck_route in enumerate(parent_2):
         for sol in truck_route:
