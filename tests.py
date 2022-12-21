@@ -1,8 +1,10 @@
 from algorithm import selection_prop, selection_tour, selection
 
-a = [(0, 1),(1,11),(2,22),(3,33),(5,55),(4,44),(6,66)] 
-npop= 2
+population_scores = [(0, 100),(1, 90),(2,120),(3,160),(5,80),(4,75),(6,95)] 
+npop = 4
 
-# print(selection(a, npop))
-print(selection_tour(a, npop))
+# print(selection_tour(a, npop))
+print(selection(population_scores, npop))
 # print(selection_prop(a, npop))
+
+
