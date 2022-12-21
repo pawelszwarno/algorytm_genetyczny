@@ -1,4 +1,4 @@
-from classes import Order, Truck, SolutionTuple, Graph, TruckType
+from classes import Order, Truck, SolutionTuple, Graph, TruckType, SelectionType
 from typing import List
 from random import randint, choice, shuffle, random
 from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME, parent_percent
@@ -92,7 +92,8 @@ def mutation(new_sol: List[List[SolutionTuple]], truck_list: List[Truck], r_mut 
                 new_sol[truck_id_to_mut][left_swap] = new_sol[truck_id_to_mut][right_swap]
                 new_sol[truck_id_to_mut][right_swap] = temp
         return new_sol
-            
+
+
 def crossing_with_possibly_uncomplete(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int, possibly_uncomplete: bool=False):
     new_sol = [[] for _ in range(len(parent_1))]
     for idx, truck_route in enumerate(parent_1):
@@ -131,23 +132,7 @@ def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTu
     return new_sol
 
 
-#TODO: do zmiany na ruletke:
-def selection_rank(population, scores):
-    sel_lst = []
-    
-    for ix in range(len(population)):
-        if len(sel_lst) == 0:
-            sel_lst.append((population[ix],scores[ix]))
-
-        if scores[ix] > sel_lst[-1][1]:
-            if len(sel_lst) >= n_pop:
-                sel_lst[-1] = (population[ix],scores[ix])
-            elif len(sel_lst) < n_pop:
-                sel_lst.append((population[ix],scores[ix]))
-        sel_lst.sort(reverse = 1, key = lambda x: x[1])
-    
-    return sel_lst
-
+# funkcja do stworzenia grafu, listy ciężarówek i listy zleceń:
 def create_structures(rows_cols: int, low_adj_matrix, high_adj_matrix: float, n_of_orders: int):
     # graf:
     g = Graph(rows_cols, rows_cols)
@@ -157,25 +142,25 @@ def create_structures(rows_cols: int, low_adj_matrix, high_adj_matrix: float, n_
     for _ in range(n_large_trucks):
         trucks_list.append(Truck(TruckType.LARGE))
     # lista zleceń:
-    orders_lst = [Order(g, 20) for _ in range(n_of_orders)]
+    orders_lst = [Order(g, 7) for _ in range(n_of_orders)]
     return g, trucks_list, orders_lst
     
 
+# selekcja najprostsza ze wszystkich - rankingowa
 def selection(population_scores: List[tuple[int, int]], population_size: int):
     population_scores.sort(key = lambda x: x[1])
     selected = population_scores[0:population_size]
     return selected
 
-def selection_rank():
-    pass
 
+# selekcja tournament:
 def selection_tour(population_score: List[tuple[int, int]] = None, population_size: int =None):
     
     selected = []
     
     if len(population_score) < population_size:
         raise ValueError
-
+    
     if (len(population_score)%2) != 0:  
         selected.append(population_score[len(population_score)%2])
     for i in range(int(len(population_score)/2)):
@@ -190,6 +175,8 @@ def selection_tour(population_score: List[tuple[int, int]] = None, population_si
     elif len(selected) > population_size:
         return selection_tour(selected, population_size)
 
+
+# selekcja - ruletka
 def selection_prop(population_score: List[tuple[int, int]] = None, population_size: int =None):
 
     selected = []
@@ -211,48 +198,45 @@ def selection_prop(population_score: List[tuple[int, int]] = None, population_si
                     selected.append(population_score[i])
         return selected
 
-    
 
-
-
-
-    
-a = [(1,11),(2,22),(3,33),(5,55),(4,44),(6,66)] 
-npop= 4
-print(selection_prop(a, npop))
-    
-#TODO: do dodania rodzice do nastepnego pokolenia:
-def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph):
-    children = []
+# AKTUALNIE ALGORYTM DZIAŁA w następujący sposób:
+# są do wyboru 3 selection_type wybierane przy wywołaniu (ruletka do napisania, ranking na pewno działa poprawnie, nwm jak touranment)
+# n_pop - globalna zmienna z variables decyduje o wielkości populacji
+# do następnego pokolenia brany jest jeden z rodziców z równą szansą
+def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_type: SelectionType, uncomplete_sol):
     population = generate_solution(truck_list, order_lst, n_large_trucks, n_small_trucks)
-    print(population[0])
-    best, best_eval = population[0], objective_function(population[0], g, truck_list, order_lst, uncomplete_sol=False)
+    # print(population[0])
+    best, best_eval = population[0], objective_function(population[0], g, truck_list, order_lst, uncomplete_sol)
+    print("Najlepsze rozwiązanie w pierwszej iteracji: ")
+    print(best)
+    print("Wartość funkcji celu w pierwszej iteracji:")
+    print(best_eval)
     for _ in range(n_iteration):
-        if len(population) < 3:
-            break
-        else:
-            population_scores = [(osobnik_id, objective_function(osobnik, g, truck_list, order_lst)) for osobnik_id, osobnik in enumerate(population)]
-            # tymczasowe rozwiązanie selekcji:
-            selected = selection(population_scores, 500)
-            # print(selected)
-            best, best_eval = population[selected[0][0]], objective_function(population[selected[0][0]], g, truck_list, order_lst)
-            # print(best_eval)
-            for i in range(0, len(selected)-1, 2):
-                # print(len(population))
-                parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
-                child = crossing(parent_1, parent_2, r_cross)
-                new_child = mutation(child, truck_list, r_mutation)
-                children.append(new_child)
-                children.append(choice([parent_1, parent_2]))
-            new_population = children
-            population_sort = (population, population_scores)
-            # population_sort = population_sort.sort(key = lambda x: x[1])
-            # population_sort = slice(len(population_sort)*parent_percent/100)
-            slice_par = slice(3)
-            print (population_sort[slice_par])
-
-
-        
+        children = []
+        population_scores = [(osobnik_id, objective_function(osobnik, g, truck_list, order_lst)) for osobnik_id, osobnik in enumerate(population)]
+        # 1) wybór selekcji - ranking:
+        if selection_type == SelectionType.RANKING:
+            selected = selection(population_scores, n_pop)
+        # 2) wybór selekcji - ruletka:
+        if selection_type == SelectionType.RULETTE:
+            selected = selection_prop(population_scores, n_pop)
+        # 3) wybór selekcji - turniej:
+        if selection_type == SelectionType.TOURNAMENT:
+            selected = selection_tour(population_scores, n_pop)
+        # nadpisanie najlepszego rozwiązania i best_eval JEŚLI obecna najmniejsza wart. funkcji celu jest większa:
+        best, best_eval = population[selected[0][0]], objective_function(population[selected[0][0]], g, truck_list, order_lst)
+        print(best_eval)
+        for i in range(0, len(selected)-1, 2):
+            parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
+            child = crossing(parent_1, parent_2, r_cross)
+            new_child = mutation(child, truck_list, r_mutation)
+            children.append(new_child)
+            # child2 = crossing(parent_1, parent_2, r_mutation)
+            # children.append(child2)
+            children.append(choice([parent_1, parent_2]))
+        population = children
+        # print("--------------------------------")
+        # print(population)
     return best, best_eval
 
 

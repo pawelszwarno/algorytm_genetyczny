@@ -1,5 +1,5 @@
 from algorithm import generate_solution, crossing, mutation, algorithm, create_structures
-from classes import Order, Truck, TruckType, Graph
+from classes import Order, Truck, TruckType, Graph, SelectionType
 from variables import n_pop, n_large_trucks, n_small_trucks, n_iteration
 
 def main():
@@ -23,13 +23,15 @@ def main():
     # sol_po_mutacji = mutation(sol_po_crossingu, trucks_list)
     # for truck in trucks_list:
     #     print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol_po_mutacji[truck.index]))
+    r_cross = 2
+    r_mutation = 0.5
     
     g, trucks_list, orders_lst = create_structures(6, 0, 10, 20)
-    r_cross = 3
-    r_mutation = 1
-    best, best_eval = algorithm(n_iteration, r_cross, r_mutation, trucks_list, orders_lst, g)
+    # print("Macierz sąsiedztwa: \n {}".format(g))
+    
+    best, best_eval = algorithm(n_iteration, r_cross, r_mutation, trucks_list, orders_lst, g, SelectionType.RANKING, uncomplete_sol=True)
     print("Najlepsze rozwiązanie: \n {}".format(best))
-    print("O wartości funkcji celu: {}".format(best_eval))
+    print("O wartości funkcji celu: {}".format(int(best_eval)))
         
     
 if __name__ == "__main__":

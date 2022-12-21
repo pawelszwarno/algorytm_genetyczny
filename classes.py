@@ -8,6 +8,15 @@ from enum import Enum
 import variables
 
 
+# enum do wyboru selekcji: 
+# ranking - wybór n najlepszych
+# ruletka - prawdopodobienstwo proporcjonalne do stosunku f.celu
+# tournament - x pojedynków między n najlepszych gdzie % wygranej 
+# zalezy od funkcji celu
+class SelectionType(Enum):
+    RANKING = 1
+    RULETTE = 2
+    TOURNAMENT = 3
 
 class TruckType(Enum):
     SMALL = 1
@@ -100,6 +109,7 @@ class Graph:
         self.cols = cols
         self.matrix = None
         self.list_of_vertices = [i for i in range(self.rows)]
+        self.min_values = []
         
     def __repr__(self):
         return self.matrix
@@ -113,6 +123,19 @@ class Graph:
                 high=high_value, size=(self.rows, self.cols), low=low_value)
             self.matrix = np.maximum(
                 weighted_matrix, weighted_matrix.transpose())
+            
             for i in range(self.rows):
-                #TODO: zmiana diagonalnych wartośći na odległość od bazy
-                self.matrix[i][i] = 10
+                self.matrix[i][i] = high_value
+            
+            for i in range(self.rows):
+                self.min_values.append(np.min(self.matrix[i]))
+                
+            for i in range(self.rows):
+                # zmiana diagonalnych wartośći na odległość od bazy 
+                # - przyjmuje, że odległość do bazy jest równa minimalnej
+                # odległości w danym wierszu/kolumnie - nie ma róźnicy, 
+                # które przyjmiemy bo macierz jest symetryczna.
+                self.matrix[i][i] = self.min_values[i]
+                
+    def print_min_to_check(self):
+        print("Wartości minimalne po wierszach: {}".format(self.min_values))
