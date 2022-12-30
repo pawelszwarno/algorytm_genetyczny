@@ -1,5 +1,7 @@
 import tkinter as tk
+from tkinter import messagebox
 import json
+from pathlib import Path
 
 # Create the main window
 window = tk.Tk()
@@ -11,7 +13,9 @@ def run_functions():
     # Save the variables to a dictionary
     data = {"{}".format(var_names[i]): variables[i] for i in range(len(variables))}
     # Write the dictionary to a JSON file
-    with open("variables.json", "w") as f:
+    cwd = Path.cwd()
+    var_path = cwd / 'data' / 'variables.json'
+    with open(var_path, "w") as f:
         json.dump(data, f)
 
 # Create a list to hold the variables
@@ -21,9 +25,13 @@ variables = []
 def get_values():
     global variables
     variables = []
-    for entry in entries:
-        variables.append(entry.get())
-    run_functions()
+    try:
+        for entry in entries:
+            variables.append(entry.get())
+    except ValueError:
+        messagebox.showerror('Value Error', 'Only integer values are accepted!')
+    else:
+        run_functions()
 
 # Create the entries and add them to the window
 entries = []

@@ -1,6 +1,5 @@
-from algorithm import generate_solution, crossing, mutation, algorithm, create_structures, selection, selection_tour
-from classes import Order, Truck, TruckType, Graph, SelectionType
-from variables import n_pop, n_large_trucks, n_small_trucks, n_iteration, r_cross, r_mutation
+from src.algorithm import generate_solution, crossing, mutation, algorithm, create_structures, selection, selection_tour
+from src.classes import Order, Truck, TruckType, Graph
 
 
 def main():
@@ -24,11 +23,18 @@ def main():
     # sol_po_mutacji = mutation(sol_po_crossingu, trucks_list)
     # for truck in trucks_list:
     #     print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol_po_mutacji[truck.index]))
+    import json
+    from pathlib import Path
+
+    cwd = Path().cwd()
+    json_path = cwd / 'data' / 'variables.json'
+    with open(json_path) as f:
+        variables = json.load(f)
     
     g, trucks_list, orders_lst = create_structures(rows_cols=6, low_adj_matrix=0, high_adj_matrix=10, n_of_orders=40)
     # print("Macierz sąsiedztwa: \n {}".format(g))
     
-    best, best_eval = algorithm(n_iteration, r_cross, r_mutation, trucks_list, orders_lst, g, selection, uncomplete_sol=False)
+    best, best_eval = algorithm(variables['n_iteration'], variables['r_cross'], variables['r_mutation'], trucks_list, orders_lst, g, selection, uncomplete_sol=False)
     print("Najlepsze rozwiązanie: \n {}".format(best))
     print("O wartości funkcji celu: {}".format(int(best_eval)))
         

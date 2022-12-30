@@ -1,13 +1,13 @@
-from classes import Order, Truck, SolutionTuple, Graph, TruckType, SelectionType, CompleteSolution
+from src.classes import Order, Truck, SolutionTuple, Graph, TruckType, CompleteSolution
 from typing import List
 from random import randint, choice, shuffle, random
-from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME, parent_percent
+from src import variables
 from copy import deepcopy
 
 
 def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[CompleteSolution]:
     population = []
-    for _ in range(n_pop):
+    for _ in range(variables['n_pop']):
         solution = [[] for _ in range(n_large_truck+n_small_truck)]
         for order in orders_list:
             current_n_pallets = order.n_pallets
@@ -59,7 +59,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
                 #     print("Zamówienie dowiezione na czas")
                 
                 if delivery_time > curr_order_info.deadline:
-                    penalty = penalty_factor * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
+                    penalty = variables['penalty_factor'] * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
                     # print("Deadline: {}".format(curr_order_info.deadline))
                     # print("Czas dowozu: {}".format(delivery_time))
                     # print("Kara jest równa {}".format(penalty))
@@ -72,7 +72,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
     
     if uncomplete_sol:
         for idx, pallets in enumerate(delivered_pallets_in_order):
-            penalty = penalty_factor*10 * SIMULATION_TIME * (order_list[idx].n_pallets - pallets)
+            penalty = variables['penalty_factor']*10 * variables['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
             cost += penalty
                 
     return int(cost)
@@ -148,8 +148,8 @@ def create_structures(rows_cols: int, low_adj_matrix, high_adj_matrix: float, n_
     g = Graph(rows_cols, rows_cols)
     g.create_adj_matrix(low_adj_matrix, high_adj_matrix)
     # lista ciężarówek:
-    trucks_list = [Truck(TruckType.SMALL) for _ in range(n_small_trucks)]
-    for _ in range(n_large_trucks):
+    trucks_list = [Truck(TruckType.SMALL) for _ in range(variables['n_small_trucks'])]
+    for _ in range(variables['n_large_trucks']):
         trucks_list.append(Truck(TruckType.LARGE))
     # lista zleceń:
     orders_lst = [Order(g, 7) for _ in range(n_of_orders)]
@@ -211,7 +211,7 @@ def selection_prop(population_score: List[tuple[int, int]] = None, population_si
 # n_pop - globalna zmienna z variables decyduje o wielkości populacji
 # do następnego pokolenia brany jest jeden z rodziców z równą szansą
 def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
-    population = generate_solution(truck_list, order_lst, n_large_trucks, n_small_trucks)
+    population = generate_solution(truck_list, order_lst, variables['n_large_trucks'], variables['n_small_trucks'])
     best = population[0]
     best_eval = objective_function(population[0], g, truck_list, order_lst, False)
     print("Najlepsze rozwiązanie w pierwszej iteracji: ")
@@ -221,11 +221,11 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
     for _ in range(n_iteration):
         children = []
         population_scores = []
-        for i in range(n_pop):
+        for i in range(variables['n_pop']):
             cost = objective_function(population[i], g, truck_list, order_lst)
             population_scores.append((i, cost))
 
-        selected = selection_function(population_scores, n_pop)
+        selected = selection_function(population_scores, variables['n_pop'])
             
         # nadpisanie najlepszego rozwiązania i best_eval JEŚLI obecna najmniejsza wart. funkcji celu jest większa:
         if population_scores[0][1] < best_eval:
