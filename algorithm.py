@@ -3,8 +3,8 @@ from typing import List
 from random import randint, choice, shuffle, random
 from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME, parent_percent
 from copy import deepcopy
-
-
+    
+   
 def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[List[List[SolutionTuple]]]:
     population = []
     for _ in range(n_pop):
