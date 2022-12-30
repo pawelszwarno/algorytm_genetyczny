@@ -28,7 +28,10 @@ except FileNotFoundError:
 window = tk.Tk()
 window.title("Variable Setter")
 
-var_names = ["SIMULATION_TIME", "speed_l", "capacity_l", "speed_s", "capacity_s", "n_small_trucks", "n_large_trucks", "n_pop", "n_iteration", "penalty_factor", "r_cross", "r_mutation", "parent_percent", "uncomplete_sol"]
+mainFrame = tk.Frame(window)
+mainFrame.grid()
+
+var_names = ["SIMULATION_TIME", "speed_l", "capacity_l", "speed_s", "capacity_s", "n_small_trucks", "n_large_trucks", "n_pop", "n_iteration", "penalty_factor", "r_cross", "r_mutation", "parent_percent"]
 integer_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s", "n_small_trucks", "n_large_trucks", "n_pop", "n_iteration", "r_cross"]
 # Create a function to run the other functions that use the variables
 def run_functions():
@@ -120,16 +123,16 @@ def get_values():
 
 # Create the entries and add them to the window
 entries = []
-for i in range(len(var_names)-1):
+for i in range(len(var_names)):
     # Create a label for the entry
     label = tk.Label(text="{}".format(var_names[i]))
-    label.pack()
+    label.grid(row=(i//5)*2,column=i%5)
 
     # Create the entry
     entry = tk.Entry(window, width=20)
     if init_variables is not None:
         entry.insert(tk.END, init_variables[var_names[i]])
-    entry.pack()
+    entry.grid(row=(i//5)*2+1,column=i%5)
     entries.append(entry)
 
 # Checkbox and radiobox section
@@ -137,7 +140,7 @@ uncomplete_sol = tk.BooleanVar()
 if init_variables is not None:
     uncomplete_sol.initialize(init_variables['uncomplete_sol'])
 c1 = tk.Checkbutton(window, text="Allow creating uncomplete solutions during crossing", variable=uncomplete_sol, onvalue=True, offvalue=False)
-c1.pack()
+c1.grid(row=6,column=2)
 
 selection_type = tk.StringVar()
 if init_variables is not None:
@@ -145,24 +148,24 @@ if init_variables is not None:
 else:
     selection_type.initialize("selection")
 r1 = tk.Radiobutton(window, text="selection",  variable = selection_type, value = "selection")
-r1.pack()
+r1.grid(row=7,column=1)
 r2 = tk.Radiobutton(window, text="selection_tour", variable = selection_type, value = "selection_tour")
-r2.pack()
+r2.grid(row=7,column=2)
 r3 = tk.Radiobutton(window, text="selection_prop",  variable = selection_type, value = "selection_prop")
-r3.pack()
+r3.grid(row=7,column=3)
 
 
 
 # Create a button to get the values from the entries
 get_values_button = tk.Button(text="Save Values", command=get_values)
-get_values_button.pack()
+get_values_button.grid(row=8,column=1)
 
 # Create a button for running algorithm
 run_algorithm_button = tk.Button(text="Run algorithm", command=main.main)
-run_algorithm_button.pack()
+run_algorithm_button.grid(row=8, column=3)
 
-text = tk.Text(window, width=100, height=10)
-text.pack()
+text = tk.Text(window, width=200, height=10)
+text.grid(row=9,columnspan=5)
 
 old_stdout = sys.stdout    
 sys.stdout = Redirect(text)
