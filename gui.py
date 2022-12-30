@@ -3,6 +3,18 @@ from tkinter import messagebox
 import json
 from pathlib import Path
 import main
+import sys
+
+
+class Redirect():
+    
+    def __init__(self, widget):
+        self.widget = widget
+
+    def write(self, text):
+        self.widget.insert('end', text)
+        self.widget.see("end")
+        
 
 cwd = Path().cwd()
 json_path = cwd / 'data' / 'variables.json'
@@ -62,18 +74,20 @@ def validate_data_and_append(checked_value, var_name):
      
     else:
         try:
+            if ',' in checked_value:
+                return "Please use '.' as a decimal separator, instead of ','"
             float_value = float(checked_value) # raises ValueError when conversion is not possible
             
             if var_name == 'r_mutation':
                 if float_value > 1:
-                    return f'r_mutation should be lower or equal to 1'
+                    return 'r_mutation should be lower or equal to 1'
                 if float_value < 0:
-                    return f'r_mutation should be higher or equal to 0'
+                    return 'r_mutation should be higher or equal to 0'
             elif var_name == 'parent_percent':
                 if float_value > 100:
-                    return f'parent_percent should be lower or equal to 100'
+                    return 'parent_percent should be lower or equal to 100'
                 if float_value < 0:
-                    return f'r_mutation should be higher or equal to 0'                
+                    return 'r_mutation should be higher or equal to 0'                
             else: 
                 if float_value <= 0:
                     return f'{var_name} should be positive'
@@ -147,6 +161,13 @@ get_values_button.pack()
 run_algorithm_button = tk.Button(text="Run algorithm", command=main.main)
 run_algorithm_button.pack()
 
+text = tk.Text(window, width=100, height=10)
+text.pack()
+
+old_stdout = sys.stdout    
+sys.stdout = Redirect(text)
 
 # Run the main loop
 window.mainloop()
+
+sys.stdout = old_stdout

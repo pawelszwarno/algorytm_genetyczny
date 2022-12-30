@@ -40,6 +40,7 @@ def main():
     print("O wartości funkcji celu: {}".format(int(best_eval)))
     Order.reset_id()
     Truck.reset_id()
+    return best, best_eval
         
     
 if __name__ == "__main__":
