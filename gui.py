@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import json
 from pathlib import Path
+import main
 
 cwd = Path().cwd()
 json_path = cwd / 'data' / 'variables.json'
@@ -141,6 +142,11 @@ r3.pack()
 # Create a button to get the values from the entries
 get_values_button = tk.Button(text="Save Values", command=get_values)
 get_values_button.pack()
+
+# Create a button for running algorithm
+run_algorithm_button = tk.Button(text="Run algorithm", command=main.main)
+run_algorithm_button.pack()
+
 
 # Run the main loop
 window.mainloop()

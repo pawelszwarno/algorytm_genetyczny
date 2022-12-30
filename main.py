@@ -38,6 +38,8 @@ def main():
     best, best_eval = algorithm.algorithm(variables['n_iteration'], variables['r_cross'], variables['r_mutation'], trucks_list, orders_lst, g, selection, variables['uncomplete_sol'])
     print("Najlepsze rozwiązanie: \n {}".format(best))
     print("O wartości funkcji celu: {}".format(int(best_eval)))
+    Order.reset_id()
+    Truck.reset_id()
         
     
 if __name__ == "__main__":
