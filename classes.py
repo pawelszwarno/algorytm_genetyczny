@@ -5,8 +5,8 @@ import pandas as pd
 from random import randint
 from random import choice
 from enum import Enum
+from typing import List
 import variables
-
 
 # enum do wyboru selekcji: 
 # ranking - wybór n najlepszych
@@ -139,3 +139,6 @@ class Graph:
                 
     def print_min_to_check(self):
         print("Wartości minimalne po wierszach: {}".format(self.min_values))
+
+
+CompleteSolution = List[List[SolutionTuple]]
