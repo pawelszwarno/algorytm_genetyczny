@@ -36,7 +36,8 @@ def validate_data(checked_value, var_name):
             elif var_name == 'n_large_trucks':
                 if int_value < 0:
                     return f'{var_name} should be non-negative'
-                if int_value + var_names['n_small_trucks'] == 0:
+                # TODO: zmien to, żeby zawsze brało 'n_large_trucks' a nie było zależne od kolejności
+                if int_value + variables[-1] == 0:
                     return f'There should be at least one truck'
             elif var_name == 'r_cross':
                 if int_value < 0:
