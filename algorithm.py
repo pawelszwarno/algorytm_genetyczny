@@ -1,11 +1,11 @@
-from classes import Order, Truck, SolutionTuple, Graph, TruckType, SelectionType
+from classes import Order, Truck, SolutionTuple, Graph, TruckType, SelectionType, CompleteSolution
 from typing import List
 from random import randint, choice, shuffle, random
 from variables import penalty_factor, n_small_trucks, n_large_trucks, n_pop, SIMULATION_TIME, parent_percent
 from copy import deepcopy
 
 
-def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[List[List[SolutionTuple]]]:
+def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[CompleteSolution]:
     population = []
     for _ in range(n_pop):
         solution = [[] for _ in range(n_large_truck+n_small_truck)]
@@ -27,12 +27,12 @@ def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_larg
     return population
 
 
-def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, truck_list: List[Truck], order_list: List[Order], uncomplete_sol=True):
+def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list: List[Truck], order_list: List[Order], uncomplete_sol: bool=True):
     cost = 0
     for j in truck_list:
-                j.current_capacity = j.capacity
-                j.current_time = 0
-                j.current_pos = 0
+        j.current_capacity = j.capacity
+        j.current_time = 0
+        j.current_pos = 0
     if uncomplete_sol:
         delivered_pallets_in_order = [0 for _ in range(len(order_list))]
     for truck_idx, truck_route in enumerate(solution):
@@ -79,7 +79,7 @@ def objective_function(solution: List[List[SolutionTuple]], cost_graph: Graph, t
 
 
 # funkcja mutacji wariant 1: zamiana kolejności w trasie losowej ilości ciężarówek 
-def mutation(new_sol: List[List[SolutionTuple]], truck_list: List[Truck], r_mut = 1.0):
+def mutation(new_sol: CompleteSolution, truck_list: List[Truck], r_mut = 1.0):
     rand_float = random()
     # jesli prawdopodobieństwo niższe niż threshold to zwracamy bez zmian
     if rand_float > r_mut:
@@ -104,7 +104,7 @@ def mutation(new_sol: List[List[SolutionTuple]], truck_list: List[Truck], r_mut 
         return new_sol
 
 
-def crossing_with_possibly_uncomplete(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int, possibly_uncomplete: bool=False):
+def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution, r_cross: int):
     new_sol = [[] for _ in range(len(parent_1))]
     for idx, truck_route in enumerate(parent_1):
         for idx_2, sol in enumerate(truck_route):
@@ -122,7 +122,7 @@ def crossing_with_possibly_uncomplete(parent_1: List[List[SolutionTuple]], paren
     return new_sol
     
 
-def crossing(parent_1: List[List[SolutionTuple]], parent_2: List[List[SolutionTuple]], r_cross: int, possibly_uncomplete: bool=False):
+def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, r_cross: int, possibly_uncomplete: bool=False):
     if possibly_uncomplete:
         return crossing_with_possibly_uncomplete(parent_1, parent_2, r_cross)
     new_sol = [[] for _ in range(len(parent_1))]
@@ -210,10 +210,10 @@ def selection_prop(population_score: List[tuple[int, int]] = None, population_si
 # są do wyboru 3 selection_type wybierane przy wywołaniu (ruletka do napisania, ranking na pewno działa poprawnie, nwm jak touranment)
 # n_pop - globalna zmienna z variables decyduje o wielkości populacji
 # do następnego pokolenia brany jest jeden z rodziców z równą szansą
-def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function, uncomplete_sol):
+def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
     population = generate_solution(truck_list, order_lst, n_large_trucks, n_small_trucks)
     best = population[0]
-    best_eval = objective_function(population[0], g, truck_list, order_lst, uncomplete_sol)
+    best_eval = objective_function(population[0], g, truck_list, order_lst, False)
     print("Najlepsze rozwiązanie w pierwszej iteracji: ")
     print(best)
     print("Wartość funkcji celu w pierwszej iteracji:")
@@ -242,6 +242,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
             children.append(choice([parent_1, parent_2]))
         print(best_eval)
         population = children
+        
     return best, best_eval
 
 

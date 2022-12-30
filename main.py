@@ -25,7 +25,7 @@ def main():
     # for truck in trucks_list:
     #     print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol_po_mutacji[truck.index]))
     
-    g, trucks_list, orders_lst = create_structures(6, 0, 10, 20)
+    g, trucks_list, orders_lst = create_structures(rows_cols=6, low_adj_matrix=0, high_adj_matrix=10, n_of_orders=40)
     # print("Macierz sąsiedztwa: \n {}".format(g))
     
     best, best_eval = algorithm(n_iteration, r_cross, r_mutation, trucks_list, orders_lst, g, selection, uncomplete_sol=False)
