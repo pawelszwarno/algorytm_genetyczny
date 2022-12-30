@@ -155,10 +155,6 @@ def create_structures(rows_cols: int, low_adj_matrix, high_adj_matrix: float, n_
     orders_lst = [Order(g, 7) for _ in range(n_of_orders)]
     return g, trucks_list, orders_lst
 
-
-def reset_truck_param(trucks_list: List[Truck]):
-    return [Truck(TruckType.SMALL) for _ in range(n_small_trucks)]
-
  
 # selekcja najprostsza ze wszystkich - rankingowa
 def selection(population_scores: List[tuple[int, int]], population_size: int):
@@ -169,12 +165,9 @@ def selection(population_scores: List[tuple[int, int]], population_size: int):
 
 # selekcja tournament:
 def selection_tour(population_score: List[tuple[int, int]] = None, population_size: int =None):
-    
     selected = []
-    
     if len(population_score) < population_size:
         raise ValueError
-    
     if (len(population_score)%2) != 0:  
         selected.append(population_score[len(population_score)%2])
     for i in range(int(len(population_score)/2)):
@@ -238,7 +231,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
         if population_scores[0][1] < best_eval:
             best_eval = population_scores[0][1]
             best = population[selected[0][0]]
-            
+        
         for i in range(0, len(selected)-1, 2):
             parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
             child = crossing(parent_1, parent_2, r_cross, possibly_uncomplete=False)
@@ -247,6 +240,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
             # child2 = crossing(parent_1, parent_2, r_mutation)
             # children.append(child2)
             children.append(choice([parent_1, parent_2]))
+        print(best_eval)
         population = children
     return best, best_eval
 

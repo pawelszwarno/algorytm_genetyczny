@@ -12,7 +12,7 @@ n_pop = 100
 n_iteration = 100
 penalty_factor = 100
 
-r_cross = 5
-r_mutation = 0.1
+r_cross = 3
+r_mutation = 0.6
 
 parent_percent = 50 #procent rodziców przekazywany do następnej populacji 0-100%

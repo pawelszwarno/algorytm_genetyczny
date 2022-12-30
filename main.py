@@ -1,4 +1,4 @@
-from algorithm import generate_solution, crossing, mutation, algorithm, create_structures, selection
+from algorithm import generate_solution, crossing, mutation, algorithm, create_structures, selection, selection_tour
 from classes import Order, Truck, TruckType, Graph, SelectionType
 from variables import n_pop, n_large_trucks, n_small_trucks, n_iteration, r_cross, r_mutation
 
