@@ -27,9 +27,17 @@ def get_values():
     variables = []
     try:
         for entry in entries:
-            variables.append(entry.get())
+            checked_value = entry.get()
+            if len(checked_value) == 0:
+                msg = 'All entries have to be filled!'
+                raise ValueError
+            if checked_value.isnumeric():
+                variables.append(checked_value)
+            else:
+                msg = 'Only positive integers are accepted!'
+                raise ValueError
     except ValueError:
-        messagebox.showerror('Value Error', 'Only integer values are accepted!')
+        messagebox.showerror('Value Error', msg)
     else:
         run_functions()
 
