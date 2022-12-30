@@ -1,4 +1,4 @@
-from src.algorithm import generate_solution, crossing, mutation, algorithm, create_structures, selection, selection_tour
+import src.algorithm as algorithm
 from src.classes import Order, Truck, TruckType, Graph
 
 
@@ -31,10 +31,11 @@ def main():
     with open(json_path) as f:
         variables = json.load(f)
     
-    g, trucks_list, orders_lst = create_structures(rows_cols=6, low_adj_matrix=0, high_adj_matrix=10, n_of_orders=40)
+    g, trucks_list, orders_lst = algorithm.create_structures(rows_cols=6, low_adj_matrix=0, high_adj_matrix=10, n_of_orders=40)
     # print("Macierz sąsiedztwa: \n {}".format(g))
     
-    best, best_eval = algorithm(variables['n_iteration'], variables['r_cross'], variables['r_mutation'], trucks_list, orders_lst, g, selection, uncomplete_sol=False)
+    selection = getattr(algorithm, variables['selection_type'])
+    best, best_eval = algorithm.algorithm(variables['n_iteration'], variables['r_cross'], variables['r_mutation'], trucks_list, orders_lst, g, selection, variables['uncomplete_sol'])
     print("Najlepsze rozwiązanie: \n {}".format(best))
     print("O wartości funkcji celu: {}".format(int(best_eval)))
         
