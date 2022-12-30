@@ -39,6 +39,10 @@ class Order:
     def __str__(self):
         return f'(id={self.index}, v={self.vertex}, n_p={self.n_pallets})'
 
+    @classmethod
+    def reset_id(cls):
+        cls.unique = 0
+
 
 class SolutionTuple:
     def __init__(self,n_order,n_pallets):
@@ -91,6 +95,10 @@ class Truck:
         self.add_time(time)
         self.current_capacity = self.capacity
         self.current_pos = 0
+    
+    @classmethod
+    def reset_id(cls):
+        cls.unique = 0
 
 
 class Graph:
