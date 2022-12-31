@@ -3,6 +3,7 @@ from typing import List
 from random import randint, choice, shuffle, random
 from src import variables
 from copy import deepcopy
+import matplotlib.pyplot as plt
 
 
 def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[CompleteSolution]:
@@ -212,8 +213,12 @@ def selection_prop(population_score: List[tuple[int, int]] = None, population_si
 # do następnego pokolenia brany jest jeden z rodziców z równą szansą
 def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
     population = generate_solution(truck_list, order_lst, variables['n_large_trucks'], variables['n_small_trucks'])
+    best_eval_list = []
+    iteration_eval_list = []
     best = population[0]
     best_eval = objective_function(population[0], g, truck_list, order_lst, False)
+    best_eval_list.append(best_eval)
+    iteration_eval_list.append(best_eval)
     print("Najlepsze rozwiązanie w pierwszej iteracji: ")
     print(best)
     print("Wartość funkcji celu w pierwszej iteracji:")
@@ -226,11 +231,15 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
             population_scores.append((i, cost))
 
         selected = selection_function(population_scores, variables['n_pop'])
-            
+        
         # nadpisanie najlepszego rozwiązania i best_eval JEŚLI obecna najmniejsza wart. funkcji celu jest większa:
         if population_scores[0][1] < best_eval:
             best_eval = population_scores[0][1]
             best = population[selected[0][0]]
+        
+        # dodanie do list, z których później będzie robiony wykres:
+        best_eval_list.append(best_eval)
+        iteration_eval_list.append(population_scores[0][1])
         
         for i in range(0, len(selected)-1, 2):
             parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
@@ -243,6 +252,15 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
         print(best_eval)
         population = children
         
-    return best, best_eval
+    return best, best_eval, best_eval_list, iteration_eval_list
 
 
+def visualise(best_eval_list, iteration_eval_list):
+    plt.figure()
+    plt.plot(best_eval_list, label='Najlepsza wartość funkcji celu')
+    plt.plot(iteration_eval_list, label='Wartość funkcji celu w danej iteracji')
+    plt.title('Wykres zależności funkcji celu do iteracji')
+    plt.xlabel('Nr iteracji')
+    plt.ylabel('Wartość funkcji celu')
+    plt.savefig('data/wykres_funkcji_celu.png')
+    # plt.show()
