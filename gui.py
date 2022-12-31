@@ -4,6 +4,11 @@ import json
 from pathlib import Path
 import main
 import sys
+from PIL import ImageTk, Image
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TkAgg")
 
 
 class Redirect():
@@ -121,6 +126,25 @@ def get_values():
     else:
         run_functions()
 
+
+def open_new_window():
+    plot_window = tk.Tk()
+    plot_window.title("Results and Plot")
+    plot_path = cwd / 'data' / 'wykres_funkcji_celu.png'
+    plot_image = Image.open(plot_path)
+   
+    # Create a figure and axes
+    fig, ax = plt.subplots()
+
+    # Add the plot to the axes
+    ax.imshow(plot_image)
+
+
+    canvas = FigureCanvasTkAgg(fig, master=plot_window)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
+    
+    
 # Create the entries and add them to the window
 entries = []
 for i in range(len(var_names)):
@@ -162,7 +186,10 @@ get_values_button.grid(row=8,column=1)
 
 # Create a button for running algorithm
 run_algorithm_button = tk.Button(text="Run algorithm", command=main.main)
-run_algorithm_button.grid(row=8, column=3)
+run_algorithm_button.grid(row=8, column=2)
+
+show_results_button = tk.Button(text="Show Results", command=open_new_window)
+show_results_button.grid(row=8, column=3)
 
 text = tk.Text(window, width=200, height=10)
 text.grid(row=9,columnspan=5)
