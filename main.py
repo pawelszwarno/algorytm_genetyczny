@@ -1,7 +1,3 @@
-import src.algorithm as algorithm
-from src.classes import Order, Truck, TruckType, Graph
-
-
 def main():
     # DO TESTOWANIA IN PROGRESS:
     # wygenerowanie początkowego rozwiązania i przedstawienie postaci rozwiązania:
@@ -25,6 +21,8 @@ def main():
     #     print('Trasa ciężarówki nr {0}: {1}'.format(truck.index, sol_po_mutacji[truck.index]))
     import json
     from pathlib import Path
+    import src.algorithm as algorithm
+    from src.classes import Order, Truck, TruckType, Graph
 
     cwd = Path().cwd()
     json_path = cwd / 'data' / 'variables.json'
@@ -36,7 +34,9 @@ def main():
     
     selection = getattr(algorithm, variables['selection_type'])
     best, best_eval = algorithm.algorithm(variables['n_iteration'], variables['r_cross'], variables['r_mutation'], trucks_list, orders_lst, g, selection, variables['uncomplete_sol'])
-    print("Najlepsze rozwiązanie: \n {}".format(best))
+    print("Najlepsze rozwiązanie:")
+    for line in best:
+        print(line)
     print("O wartości funkcji celu: {}".format(int(best_eval)))
     Order.reset_id()
     Truck.reset_id()
