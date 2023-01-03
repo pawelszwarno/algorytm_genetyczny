@@ -172,6 +172,7 @@ def show_output():
     # function used in "show output" button
     # prints saved output of main() to another window
     output_window = tk.Tk()
+    output_window.title("Final Result Window")
     width = output_window.winfo_screenwidth()
     height = output_window.winfo_screenheight()
     x = (width - output_window.winfo_reqwidth()) // 2
@@ -217,7 +218,7 @@ r2 = tk.Radiobutton(window, text="selection_tour",
                     variable=selection_type, value="selection_tour")
 r2.grid(row=8, column=2)
 r3 = tk.Radiobutton(window, text="selection_prop",
-                    variable=selection_type, value="selection_prop")
+                    variable=selection_type, value="selection_roulette")
 r3.grid(row=8, column=3)
 
 
