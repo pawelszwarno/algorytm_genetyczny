@@ -204,7 +204,7 @@ def selection_prop(population_score: List[tuple[int, int]] = None, population_si
             if select <= pop_edited[i][1]:
                 if population_score[i] not in selected:
                     selected.append(population_score[i])
-        return selected
+    return selected
 
 
 # AKTUALNIE ALGORYTM DZIAŁA w następujący sposób:
@@ -243,7 +243,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
         
         for i in range(0, len(selected)-1, 2):
             parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
-            child = crossing(parent_1, parent_2, r_cross, possibly_uncomplete=False)
+            child = crossing(parent_1, parent_2, r_cross, possibly_uncomplete=uncomplete_sol)
             new_child = mutation(child, truck_list, r_mutation)
             children.append(new_child)
             # child2 = crossing(parent_1, parent_2, r_mutation)
@@ -263,5 +263,4 @@ def visualise(best_eval_list, iteration_eval_list):
     plt.xlabel('Nr iteracji')
     plt.ylabel('Wartość funkcji celu')
     plt.tight_layout() 
-    plt.savefig('data/wykres_funkcji_celu.png')
-    # plt.show()
+    plt.savefig('data/wykres_funkcji_celu.png', dpi = 100)
