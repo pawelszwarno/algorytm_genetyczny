@@ -1,9 +1,10 @@
 from src.classes import Order, Truck, SolutionTuple, Graph, TruckType, CompleteSolution
 from typing import List
-from random import randint, choice, shuffle, random
+from random import randint, choice, shuffle, random, sample
 from src import variables
 from copy import deepcopy
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[CompleteSolution]:
@@ -164,47 +165,94 @@ def selection(population_scores: List[tuple[int, int]], population_size: int):
     return selected
 
 
-# selekcja tournament:
-def selection_tour(population_score: List[tuple[int, int]] = None, population_size: int =None):
-    selected = []
-    if len(population_score) < population_size:
-        raise ValueError
-    if (len(population_score)%2) != 0:  
-        selected.append(population_score[len(population_score)%2])
-    for i in range(int(len(population_score)/2)):
-        if population_score[i][1] >= population_score[-1-i][1]:
-            selected.append(population_score[i])
-        elif population_score[i][1] <= population_score[-1-i][1]:
-            selected.append(population_score[-1-i])
-    if len(selected) < population_size:
-        pass
-    elif len(selected) == population_size:
-        return selected
-    elif len(selected) > population_size:
-        return selection_tour(selected, population_size)
+# # selekcja tournament: (MS) - nie działa
+# def selection_tour(population_score: List[tuple[int, int]] = None, population_size: int =None):
+#     selected = []
+#     if len(population_score) < population_size:
+#         raise ValueError
+#     if (len(population_score)%2) != 0:  
+#         selected.append(population_score[len(population_score)%2])
+#     for i in range(int(len(population_score)/2)):
+#         if population_score[i][1] >= population_score[-1-i][1]:
+#             selected.append(population_score[i])
+#         elif population_score[i][1] <= population_score[-1-i][1]:
+#             selected.append(population_score[-1-i])
+#     if len(selected) < population_size:
+#         pass
+#     elif len(selected) == population_size:
+#         return selected
+#     elif len(selected) > population_size:
+#         return selection_tour(selected, population_size)
 
 
-# selekcja - ruletka
-def selection_prop(population_score: List[tuple[int, int]] = None, population_size: int =None):
+# # selekcja - ruletka (MS) - nie działa
+# def selection_prop(population_score: List[tuple[int, int]] = None, population_size: int =None):
 
-    selected = []
-    pop_edited = [population_score[0]]
+#     selected = []
+#     pop_edited = [population_score[0]]
     
-    if len(population_score) < population_size:
-        raise ValueError
+#     if len(population_score) < population_size:
+#         raise ValueError
 
-    for i in range(1,len(population_score)):
-        temp = pop_edited[i-1][1] + population_score[i][1]
-        pop_edited.append((population_score[i][0], temp))
+#     for i in range(1,len(population_score)):
+#         temp = pop_edited[i-1][1] + population_score[i][1]
+#         pop_edited.append((population_score[i][0], temp))
     
-    while len(selected) != population_size:
-        select = randint(1, pop_edited[-1][1])
+#     while len(selected) != population_size:
+#         select = randint(1, pop_edited[-1][1])
 
-        for i in range(len(pop_edited)):
-            if select <= pop_edited[i][1]:
-                if population_score[i] not in selected:
-                    selected.append(population_score[i])
+#         for i in range(len(pop_edited)):
+#             if select <= pop_edited[i][1]:
+#                 if population_score[i] not in selected:
+#                     selected.append(population_score[i])
+#     return selected
+
+
+# moja (PSu) implementacja ruletki
+def selection_roulette(population_scores: List[tuple[int, int]], population_size: int):
+    scores = np.array([score for _, score in population_scores])
+    total_score = scores.sum()
+    probabilities = scores / total_score
+    indices = np.arange(len(population_scores))
+    selected_indices = np.random.choice(indices, size=population_size, p=probabilities, replace=False)
+    return [population_scores[i] for i in selected_indices]
+
+
+# moja (PSu) implementacja turniejowego
+def selection_tour(population_scores: List[tuple[int, int]], population_size: int):
+    selected = []
+    population = [item[0] for item in population_scores]
+    while len(selected) < population_size:
+        tour = sample(population, min(3, len(population)))
+        tour_scores = [(index, score) for index, score in population_scores if index in tour]
+        tour_scores.sort(key = lambda x: x[1], reverse = True)
+        winner = tour_scores[0]
+        selected.append(winner)
+        population.remove(winner[0])
     return selected
+
+
+# implementacja turniejowej selekcji - ale chyba wersja powyzej lepsza ze stałym tour_size 3
+# def selection_tour3(population_scores: List[tuple[int, int]], population_size: int):
+#     tour_size = population_size // 10
+#     selected = []
+#     population = [item[0] for item in population_scores]
+#     while len(selected) < population_size:
+#         if len(population) <= tour_size:
+#             # Select the remaining individuals in the population as a group
+#             tour_scores = [(index, score) for index, score in population_scores if index in population]
+#             tour_scores.sort(key = lambda x: x[1], reverse = True)
+#             selected.extend(tour_scores)
+#             break
+#         else:
+#             # Select a tournament of size tour_size
+#             tour = sample(population, tour_size)
+#             tour_scores = [(index, score) for index, score in population_scores if index in tour]
+#             tour_scores.sort(key = lambda x: x[1], reverse = True)
+#             winner = tour_scores[0]
+#             selected.append(winner)
+#             population.remove(winner[0])
+#     return selected
 
 
 # AKTUALNIE ALGORYTM DZIAŁA w następujący sposób:
