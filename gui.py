@@ -40,9 +40,9 @@ var_names = ["SIMULATION_TIME", "speed_l", "capacity_l", "speed_s", "capacity_s"
              "n_large_trucks", "n_pop", "n_iteration", "penalty_factor", "r_cross", "r_mutation", "parent_percent"]
 integer_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
                 "n_small_trucks", "n_large_trucks", "n_pop", "n_iteration", "r_cross"]
+
+
 # Create a function to run the other functions that use the variables
-
-
 def run_functions():
     # Write the dictionary to a JSON file
     cwd = Path.cwd()
@@ -115,8 +115,8 @@ def validate_data_and_append(checked_value, var_name):
             return 'Success'
 
 
-# Create a function to get the values from the entries
-def get_values():
+# Create a function to save the values from the entries
+def save_values():
     global variables
     variables = {}
     try:
@@ -134,15 +134,22 @@ def get_values():
         run_functions()
 
 
-def open_new_window():
+def show_plot():
     plot_window = tk.Tk()
+    plot_window.geometry("800x600")
     plot_window.title("Results and Plot")
     plot_path = cwd / 'data' / 'wykres_funkcji_celu.png'
     plot_image = Image.open(plot_path)
-
-    # Create a figure and axes
+    
+    width = plot_window.winfo_screenwidth()
+    height = plot_window.winfo_screenheight()
+    x = (width - plot_window.winfo_reqwidth()) // 2
+    y = (height - plot_window.winfo_reqheight()) // 2
+    plot_window.geometry(f"+{x}+{y}")
+    
     fig, ax = plt.subplots()
-
+    fig.set_size_inches(width/100, height/100, forward=True)
+    
     # Add the plot to the axes
     ax.imshow(plot_image)
     ax.set_axis_off()
@@ -152,8 +159,7 @@ def open_new_window():
 
     canvas = FigureCanvasTkAgg(fig, master=plot_window)
     canvas.draw()
-    canvas.get_tk_widget().pack(side="top", fill="both", expand=1)
-
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
 def run_algorithm():
     # function used in "run algorithm" button
@@ -165,10 +171,16 @@ def run_algorithm():
 def show_output():
     # function used in "show output" button
     # prints saved output of main() to another window
-    output_window = tk.Toplevel()
+    output_window = tk.Tk()
+    width = output_window.winfo_screenwidth()
+    height = output_window.winfo_screenheight()
+    x = (width - output_window.winfo_reqwidth()) // 2
+    y = (height - output_window.winfo_reqheight()) // 2
+    output_window.geometry(f"+{x}+{y}")
     text = tk.Text(output_window)
-    text.pack()
+    text.pack(fill=tk.BOTH, expand=1) # set the fill and expand options to make the widget resize with the window
     text.insert('end', output)
+
 
 
 # Create the entries and add them to the window
@@ -200,36 +212,35 @@ else:
     selection_type.initialize("selection")
 r1 = tk.Radiobutton(window, text="selection",
                     variable=selection_type, value="selection")
-r1.grid(row=7, column=1)
+r1.grid(row=8, column=1)
 r2 = tk.Radiobutton(window, text="selection_tour",
                     variable=selection_type, value="selection_tour")
-r2.grid(row=7, column=2)
+r2.grid(row=8, column=2)
 r3 = tk.Radiobutton(window, text="selection_prop",
                     variable=selection_type, value="selection_prop")
-r3.grid(row=7, column=3)
+r3.grid(row=8, column=3)
 
 
 # Create a button to get the values from the entries
-get_values_button = tk.Button(text="Save Values", command=get_values)
-get_values_button.grid(row=8, column=0)
+save_values_button = tk.Button(text="Save Values", command=save_values)
+save_values_button.grid(row=10, column=0, columnspan=2)
 
 # Create a button for running algorithm
 run_algorithm_button = tk.Button(text="Run algorithm", command=run_algorithm)
-run_algorithm_button.grid(row=8, column=1)
+run_algorithm_button.grid(row=10, column=1, columnspan=2)
 
-show_results_button = tk.Button(text="Show Results", command=open_new_window)
-show_results_button.grid(row=8, column=2)
+show_results_button = tk.Button(text="Show Results", command=show_plot)
+show_results_button.grid(row=10, column=2, columnspan=2)
 
-# TODO: do końca - ewentualne przekierowanie outputu z maina dopiero jak naciśnięty będzie przycisk
 show_output_button = tk.Button(window, text="Show output", command=show_output)
-show_output_button.grid(row=8, column=3)
+show_output_button.grid(row=10, column=3, columnspan=2)
 
 # text = tk.Text(window, width=200, height=10)
 # text.grid(row=9,columnspan=5)
 
 # old_stdout = sys.stdout
 # sys.stdout = Redirect(text)
-
+window.eval('tk::PlaceWindow . center')
 # Run the main loop
 window.mainloop()
 
