@@ -262,5 +262,6 @@ def visualise(best_eval_list, iteration_eval_list):
     plt.title('Wykres zależności funkcji celu do iteracji')
     plt.xlabel('Nr iteracji')
     plt.ylabel('Wartość funkcji celu')
+    plt.tight_layout() 
     plt.savefig('data/wykres_funkcji_celu.png')
     # plt.show()
