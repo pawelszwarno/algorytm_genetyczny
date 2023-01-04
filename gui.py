@@ -213,13 +213,16 @@ else:
     selection_type.initialize("selection")
 r1 = tk.Radiobutton(window, text="selection",
                     variable=selection_type, value="selection")
-r1.grid(row=8, column=1)
+r1.grid(row=7, column=1, columnspan=2)
 r2 = tk.Radiobutton(window, text="selection_tour",
                     variable=selection_type, value="selection_tour")
-r2.grid(row=8, column=2)
+r2.grid(row=7, column=2, columnspan=2)
 r3 = tk.Radiobutton(window, text="selection_prop",
                     variable=selection_type, value="selection_roulette")
-r3.grid(row=8, column=3)
+r3.grid(row=8, column=1, columnspan=2)
+r4 = tk.Radiobutton(window, text="selection_rank",
+                    variable=selection_type, value="selection_rank")
+r4.grid(row=8, column=2, columnspan=2)
 
 
 # Create a button to get the values from the entries

@@ -207,6 +207,39 @@ def selection(population_scores: List[tuple[int, int]], population_size: int):
 #                     selected.append(population_score[i])
 #     return selected
 
+def selection_rank(population_score: List[tuple[int, int]] = None, population_size: int =None):
+
+    if len(population_score) < population_size:
+        raise ValueError
+
+    selected = []
+    population_score.sort(key = lambda x: x[1], reverse=1)
+    pop_rank = np.zeros(len(population_score)+1) 
+
+    for i in range(len(population_score)):
+        j = len(population_score) - i 
+        pop_rank[i] = j**2
+    
+    while len(selected) != population_size:
+
+        select = randint(1, pop_rank[0]+1)
+        temp = False
+
+        for i in range(len(population_score)):
+            if temp == True:
+                pass
+            
+            if temp == False:
+                if select <= pop_rank[i] and select > pop_rank[i+1]:
+                    if population_score[i] in selected:
+                        break
+                    if population_score[i] not in selected:
+                        selected.append(population_score[i])
+                        temp = True
+    
+    return selected
+
+
 
 # moja (PSu) implementacja ruletki
 def selection_roulette(population_scores: List[tuple[int, int]], population_size: int):
@@ -277,7 +310,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
         for i in range(variables['n_pop']):
             cost = objective_function(population[i], g, truck_list, order_lst)
             population_scores.append((i, cost))
-
+        print(population_scores)
         selected = selection_function(population_scores, variables['n_pop'])
         
         # nadpisanie najlepszego rozwiązania i best_eval JEŚLI obecna najmniejsza wart. funkcji celu jest większa:
