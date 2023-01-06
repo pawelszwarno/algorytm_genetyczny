@@ -9,6 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("TkAgg")
+import src.algorithm
 
 
 class Redirect():
@@ -224,6 +225,8 @@ r4 = tk.Radiobutton(window, text="selection_rank",
                     variable=selection_type, value="selection_rank")
 r4.grid(row=8, column=2, columnspan=2)
 
+# 
+
 
 # Create a button to get the values from the entries
 save_values_button = tk.Button(text="Save Values", command=save_values)
@@ -238,6 +241,10 @@ show_results_button.grid(row=10, column=2, columnspan=2)
 
 show_output_button = tk.Button(window, text="Show output", command=show_output)
 show_output_button.grid(row=10, column=3, columnspan=2)
+
+
+create_struct_button = tk.Button(window, text="Create struct", command=src.algorithm.create_structures)
+create_struct_button.grid(row=10, column=4, columnspan=2)
 
 # text = tk.Text(window, width=200, height=10)
 # text.grid(row=9,columnspan=5)

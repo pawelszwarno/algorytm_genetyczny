@@ -39,12 +39,12 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
         delivered_pallets_in_order = [0 for _ in range(len(order_list))]
     for truck_idx, truck_route in enumerate(solution):
         prev_order_nr = None
+        curr_truck = truck_list[truck_idx]
         for curr_order in truck_route:
             curr_order_info = order_list[curr_order.n_order]
             missing_pallets = curr_order.n_pallets
             while missing_pallets > 0:
 
-                curr_truck = truck_list[truck_idx]
                 if prev_order_nr is None:
                     distance = cost_graph.matrix[curr_order_info.vertex, curr_order_info.vertex]
                 else:
@@ -74,8 +74,12 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
     
     if uncomplete_sol:
         for idx, pallets in enumerate(delivered_pallets_in_order):
-            penalty = variables['penalty_factor']*10 * variables['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
-            cost += penalty
+            if order_list[idx].n_pallets > pallets:
+                print('AAaAAAAAAAAAAAAAAAAAAAAAAA')
+                penalty = variables['penalty_factor']*0.1 * variables['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
+                cost += penalty
+            else:
+                print('aa')
                 
     return int(cost)
 
@@ -117,7 +121,7 @@ def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: Comp
 
     for idx, truck_route in enumerate(parent_2):
         for idx_2, sol in enumerate(truck_route):
-            if sol.n_order < r_cross:
+            if idx_2 < r_cross:
                 continue
             else:
                 new_sol[idx].append(sol)

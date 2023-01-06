@@ -7,14 +7,12 @@ def main():
     from src.algorithm import visualise
     from io import StringIO
     import sys
-
+    from create_struct import g, trucks_list, orders_lst
+    
     cwd = Path().cwd()
     json_path = cwd / 'data' / 'variables.json'
     with open(json_path) as f:
         variables = json.load(f)
-
-    g, trucks_list, orders_lst = algorithm.create_structures(
-        rows_cols=6, low_adj_matrix=0, high_adj_matrix=10, n_of_orders=40)
 
     # Save the current stdout
     original_stdout = sys.stdout
