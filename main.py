@@ -23,9 +23,9 @@ def main():
     # Redirect the output to the buffer
     sys.stdout = output_buffer
 
-    selection = getattr(algorithm, variables['selection_type'])
+    selection = getattr(algorithm, variables["algorithm_data"]['selection_type'])
     best, best_eval, best_eval_list, iteration_eval_list = algorithm.algorithm(
-        variables['n_iteration'], variables['r_cross'], variables['r_mutation'], trucks_list, orders_lst, g, selection, variables['uncomplete_sol'])
+        variables["algorithm_data"]['n_iterations'], variables["algorithm_data"]['r_mutation'], trucks_list, orders_lst, g, selection, variables["algorithm_data"]['uncomplete_sol'])
     print("Najlepsze rozwiązanie:")
     for line in best:
         print(line)
