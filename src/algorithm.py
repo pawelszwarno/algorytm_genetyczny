@@ -9,7 +9,7 @@ import numpy as np
 
 def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[CompleteSolution]:
     population = []
-    for _ in range(variables['n_pop']):
+    for _ in range(variables["algorithm_data"]['n_pop']):
         solution = [[] for _ in range(n_large_truck+n_small_truck)]
         for order in orders_list:
             current_n_pallets = order.n_pallets
@@ -61,7 +61,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
                 #     print("Zamówienie dowiezione na czas")
                 
                 if delivery_time > curr_order_info.deadline:
-                    penalty = variables['penalty_factor'] * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
+                    penalty = variables["algorithm_data"]['penalty_factor'] * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
                     # print("Deadline: {}".format(curr_order_info.deadline))
                     # print("Czas dowozu: {}".format(delivery_time))
                     # print("Kara jest równa {}".format(penalty))
@@ -76,7 +76,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
         for idx, pallets in enumerate(delivered_pallets_in_order):
             if order_list[idx].n_pallets > pallets:
                 print('AAaAAAAAAAAAAAAAAAAAAAAAAA')
-                penalty = variables['penalty_factor']*0.1 * variables['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
+                penalty = variables["algorithm_data"]['penalty_factor']*0.1 * variables["structures_data"]['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
                 cost += penalty
             else:
                 print('aa')
@@ -110,38 +110,38 @@ def mutation(new_sol: CompleteSolution, truck_list: List[Truck], r_mut = 1.0):
         return new_sol
 
 
-def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution, r_cross: int):
+def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution):
     new_sol = [[] for _ in range(len(parent_1))]
     for idx, truck_route in enumerate(parent_1):
         for idx_2, sol in enumerate(truck_route):
-            if idx_2 < r_cross:
+            if idx_2 < random.randrange(variables["structures_data"]["n_of_orders"]):
                 new_sol[idx].append(sol)
             else:
                 break
 
     for idx, truck_route in enumerate(parent_2):
         for idx_2, sol in enumerate(truck_route):
-            if idx_2 < r_cross:
+            if idx_2 < random.randrange(variables["structures_data"]["n_of_orders"]):
                 continue
             else:
                 new_sol[idx].append(sol)
     return new_sol
     
 
-def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, r_cross: int, possibly_uncomplete: bool=False):
+def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_uncomplete: bool=False):
     if possibly_uncomplete:
-        return crossing_with_possibly_uncomplete(parent_1, parent_2, r_cross)
+        return crossing_with_possibly_uncomplete(parent_1, parent_2)
     new_sol = [[] for _ in range(len(parent_1))]
     for idx, truck_route in enumerate(parent_1):
         for sol in truck_route:
-            if sol.n_order < r_cross:
+            if sol.n_order < random.randrange(variables["structures_data"]["n_of_orders"]):
                 new_sol[idx].append(sol)
             else:
                 continue
 
     for idx, truck_route in enumerate(parent_2):
         for sol in truck_route:
-            if sol.n_order < r_cross:
+            if sol.n_order < random.randrange(variables["structures_data"]["n_of_orders"]):
                 continue
             else:
                 new_sol[idx].append(sol)
@@ -149,13 +149,17 @@ def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, r_cross: in
 
 
 # funkcja do stworzenia grafu, listy ciężarówek i listy zleceń:
-def create_structures(rows_cols: int, low_adj_matrix, high_adj_matrix: float, n_of_orders: int):
+def create_structures(rows_cols: int, low_adj_matrix: int, high_adj_matrix: float, n_of_orders: int):
     # graf:
+    rows_cols = variables["structures_data"]["rows_cols"]
+    low_adj_matrix = variables["structures_data"]["low_adj_matrix"]
+    high_adj_matrix = variables["structures_data"]["high_adj_matrix"]
+    n_of_orders = variables["structures_data"]["n_of_orders"]
     g = Graph(rows_cols, rows_cols)
     g.create_adj_matrix(low_adj_matrix, high_adj_matrix)
     # lista ciężarówek:
-    trucks_list = [Truck(TruckType.SMALL) for _ in range(variables['n_small_trucks'])]
-    for _ in range(variables['n_large_trucks']):
+    trucks_list = [Truck(TruckType.SMALL) for _ in range(variables["structures_data"]['n_small_trucks'])]
+    for _ in range(variables["structures_data"]['n_large_trucks']):
         trucks_list.append(Truck(TruckType.LARGE))
     # lista zleceń:
     orders_lst = [Order(g, 7) for _ in range(n_of_orders)]
@@ -168,48 +172,6 @@ def selection(population_scores: List[tuple[int, int]], population_size: int):
     selected = population_scores[0:population_size]
     return selected
 
-
-# # selekcja tournament: (MS) - nie działa
-# def selection_tour(population_score: List[tuple[int, int]] = None, population_size: int =None):
-#     selected = []
-#     if len(population_score) < population_size:
-#         raise ValueError
-#     if (len(population_score)%2) != 0:  
-#         selected.append(population_score[len(population_score)%2])
-#     for i in range(int(len(population_score)/2)):
-#         if population_score[i][1] >= population_score[-1-i][1]:
-#             selected.append(population_score[i])
-#         elif population_score[i][1] <= population_score[-1-i][1]:
-#             selected.append(population_score[-1-i])
-#     if len(selected) < population_size:
-#         pass
-#     elif len(selected) == population_size:
-#         return selected
-#     elif len(selected) > population_size:
-#         return selection_tour(selected, population_size)
-
-
-# # selekcja - ruletka (MS) - nie działa
-# def selection_prop(population_score: List[tuple[int, int]] = None, population_size: int =None):
-
-#     selected = []
-#     pop_edited = [population_score[0]]
-    
-#     if len(population_score) < population_size:
-#         raise ValueError
-
-#     for i in range(1,len(population_score)):
-#         temp = pop_edited[i-1][1] + population_score[i][1]
-#         pop_edited.append((population_score[i][0], temp))
-    
-#     while len(selected) != population_size:
-#         select = randint(1, pop_edited[-1][1])
-
-#         for i in range(len(pop_edited)):
-#             if select <= pop_edited[i][1]:
-#                 if population_score[i] not in selected:
-#                     selected.append(population_score[i])
-#     return selected
 
 def selection_rank(population_score: List[tuple[int, int]] = None, population_size: int =None):
 
@@ -269,35 +231,12 @@ def selection_tour(population_scores: List[tuple[int, int]], population_size: in
     return selected
 
 
-# implementacja turniejowej selekcji - ale chyba wersja powyzej lepsza ze stałym tour_size 3
-# def selection_tour3(population_scores: List[tuple[int, int]], population_size: int):
-#     tour_size = population_size // 10
-#     selected = []
-#     population = [item[0] for item in population_scores]
-#     while len(selected) < population_size:
-#         if len(population) <= tour_size:
-#             # Select the remaining individuals in the population as a group
-#             tour_scores = [(index, score) for index, score in population_scores if index in population]
-#             tour_scores.sort(key = lambda x: x[1], reverse = True)
-#             selected.extend(tour_scores)
-#             break
-#         else:
-#             # Select a tournament of size tour_size
-#             tour = sample(population, tour_size)
-#             tour_scores = [(index, score) for index, score in population_scores if index in tour]
-#             tour_scores.sort(key = lambda x: x[1], reverse = True)
-#             winner = tour_scores[0]
-#             selected.append(winner)
-#             population.remove(winner[0])
-#     return selected
-
-
 # AKTUALNIE ALGORYTM DZIAŁA w następujący sposób:
 # są do wyboru 3 selection_type wybierane przy wywołaniu (ruletka do napisania, ranking na pewno działa poprawnie, nwm jak touranment)
 # n_pop - globalna zmienna z variables decyduje o wielkości populacji
 # do następnego pokolenia brany jest jeden z rodziców z równą szansą
-def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
-    population = generate_solution(truck_list, order_lst, variables['n_large_trucks'], variables['n_small_trucks'])
+def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
+    population = generate_solution(truck_list, order_lst, variables["structures_data"]['n_large_trucks'], variables["structures_data"]['n_small_trucks'])
     best_eval_list = []
     iteration_eval_list = []
     best = population[0]
@@ -311,11 +250,11 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
     for _ in range(n_iteration):
         children = []
         population_scores = []
-        for i in range(variables['n_pop']):
+        for i in range(variables["algorithm_data"]['n_pop']):
             cost = objective_function(population[i], g, truck_list, order_lst)
             population_scores.append((i, cost))
         print(population_scores)
-        selected = selection_function(population_scores, variables['n_pop'])
+        selected = selection_function(population_scores, variables["algorithm_data"]['n_pop'])
         
         # nadpisanie najlepszego rozwiązania i best_eval JEŚLI obecna najmniejsza wart. funkcji celu jest większa:
         if population_scores[0][1] < best_eval:
@@ -328,7 +267,7 @@ def algorithm(n_iteration: int , r_cross: float, r_mutation: float, truck_list: 
         
         for i in range(0, len(selected)-1, 2):
             parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
-            child = crossing(parent_1, parent_2, r_cross, possibly_uncomplete=uncomplete_sol)
+            child = crossing(parent_1, parent_2, possibly_uncomplete=uncomplete_sol)
             new_child = mutation(child, truck_list, r_mutation)
             children.append(new_child)
             # child2 = crossing(parent_1, parent_2, r_mutation)
