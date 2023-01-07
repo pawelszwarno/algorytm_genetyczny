@@ -30,7 +30,7 @@ class Order:
         # deadline dany jako losowa liczba godzin od czasu startwoego 0:
         # czyli np. deadline 32 znaczy 1 dzień i 8h po rozpoczęciu mięsiąca
         # naszego horyzontu czasowego.
-        self.deadline = randint(1, variables['SIMULATION_TIME'])
+        self.deadline = randint(1, variables["structures_data"]['SIMULATION_TIME'])
         self.__class__.unique += 1
 
     def __repr__(self):
@@ -65,11 +65,11 @@ class Truck:
         self.type = type
         self.index = self.unique
         if type == TruckType.SMALL:
-            self.speed = variables['speed_s']
-            self.capacity = variables['capacity_s']
+            self.speed = variables["structures_data"]['speed_s']
+            self.capacity = variables["structures_data"]['capacity_s']
         elif type == TruckType.LARGE:
-            self.speed = variables['speed_l']
-            self.capacity = variables['capacity_l']
+            self.speed = variables["structures_data"]['speed_l']
+            self.capacity = variables["structures_data"]['capacity_l']
         self.__class__.unique += 1
         self.current_time = 0
         self.current_capacity = self.capacity
