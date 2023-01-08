@@ -75,11 +75,8 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
     if uncomplete_sol:
         for idx, pallets in enumerate(delivered_pallets_in_order):
             if order_list[idx].n_pallets > pallets:
-                print('AAaAAAAAAAAAAAAAAAAAAAAAAA')
                 penalty = variables["algorithm_data"]['penalty_factor']*0.1 * variables["structures_data"]['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
                 cost += penalty
-            else:
-                print('aa')
                 
     return int(cost)
 
@@ -112,9 +109,10 @@ def mutation(new_sol: CompleteSolution, truck_list: List[Truck], r_mut = 1.0):
 
 def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution):
     new_sol = [[] for _ in range(len(parent_1))]
+    rand_num = random.randrange(variables["structures_data"]["n_of_orders"])
     for idx, truck_route in enumerate(parent_1):
         for idx_2, sol in enumerate(truck_route):
-            if idx_2 < random.randrange(variables["structures_data"]["n_of_orders"]):
+            if idx_2 < rand_num:
                 new_sol[idx].append(sol)
             else:
                 break
@@ -132,16 +130,17 @@ def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_un
     if possibly_uncomplete:
         return crossing_with_possibly_uncomplete(parent_1, parent_2)
     new_sol = [[] for _ in range(len(parent_1))]
+    rand_num = random.randrange(variables["structures_data"]["n_of_orders"])
     for idx, truck_route in enumerate(parent_1):
         for sol in truck_route:
-            if sol.n_order < random.randrange(variables["structures_data"]["n_of_orders"]):
+            if sol.n_order < rand_num:
                 new_sol[idx].append(sol)
             else:
                 continue
 
     for idx, truck_route in enumerate(parent_2):
         for sol in truck_route:
-            if sol.n_order < random.randrange(variables["structures_data"]["n_of_orders"]):
+            if sol.n_order < rand_num:
                 continue
             else:
                 new_sol[idx].append(sol)
@@ -149,7 +148,7 @@ def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_un
 
 
 # funkcja do stworzenia grafu, listy ciężarówek i listy zleceń:
-def create_structures(rows_cols: int, low_adj_matrix: int, high_adj_matrix: float, n_of_orders: int):
+def create_structures():
     # graf:
     rows_cols = variables["structures_data"]["rows_cols"]
     low_adj_matrix = variables["structures_data"]["low_adj_matrix"]
@@ -253,7 +252,6 @@ def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], orde
         for i in range(variables["algorithm_data"]['n_pop']):
             cost = objective_function(population[i], g, truck_list, order_lst)
             population_scores.append((i, cost))
-        print(population_scores)
         selected = selection_function(population_scores, variables["algorithm_data"]['n_pop'])
         
         # nadpisanie najlepszego rozwiązania i best_eval JEŚLI obecna najmniejsza wart. funkcji celu jest większa:
