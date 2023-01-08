@@ -1,6 +1,6 @@
 from src.classes import Order, Truck, SolutionTuple, Graph, TruckType, CompleteSolution
 from typing import List
-from random import randint, choice, shuffle, random, sample
+from random import randint, choice, shuffle, random, sample, randrange
 from src import variables
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -109,17 +109,17 @@ def mutation(new_sol: CompleteSolution, truck_list: List[Truck], r_mut = 1.0):
 
 def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution):
     new_sol = [[] for _ in range(len(parent_1))]
-    rand_num = random.randrange(variables["structures_data"]["n_of_orders"])
+    r_cross = randrange(variables["structures_data"]["n_of_orders"])
     for idx, truck_route in enumerate(parent_1):
         for idx_2, sol in enumerate(truck_route):
-            if idx_2 < rand_num:
+            if idx_2 < r_cross:
                 new_sol[idx].append(sol)
             else:
                 break
 
     for idx, truck_route in enumerate(parent_2):
         for idx_2, sol in enumerate(truck_route):
-            if idx_2 < random.randrange(variables["structures_data"]["n_of_orders"]):
+            if idx_2 < r_cross:
                 continue
             else:
                 new_sol[idx].append(sol)
@@ -130,17 +130,17 @@ def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_un
     if possibly_uncomplete:
         return crossing_with_possibly_uncomplete(parent_1, parent_2)
     new_sol = [[] for _ in range(len(parent_1))]
-    rand_num = random.randrange(variables["structures_data"]["n_of_orders"])
+    r_cross = randrange(variables["structures_data"]["n_of_orders"])
     for idx, truck_route in enumerate(parent_1):
         for sol in truck_route:
-            if sol.n_order < rand_num:
+            if sol.n_order < r_cross:
                 new_sol[idx].append(sol)
             else:
                 continue
 
     for idx, truck_route in enumerate(parent_2):
         for sol in truck_route:
-            if sol.n_order < rand_num:
+            if sol.n_order < r_cross:
                 continue
             else:
                 new_sol[idx].append(sol)
