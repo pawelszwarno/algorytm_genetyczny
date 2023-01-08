@@ -1,0 +1,1 @@
+{"structures_data": {"SIMULATION_TIME": 720, "rows_cols": 6, "low_adj_matrix": 1, "high_adj_matrix": 10, "n_of_orders": 40, "n_small_trucks": 5, "n_large_trucks": 5, "speed_s": 2.0, "capacity_s": 5, "speed_l": 1.0, "capacity_l": 10}, "algorithm_data": {}}
