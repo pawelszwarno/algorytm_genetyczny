@@ -28,8 +28,6 @@ def main(g, trucks_list, orders_lst):
     for line in best:
         print(line)
     print("O wartości funkcji celu: {}".format(int(best_eval)))
-    Order.reset_id()
-    Truck.reset_id()
     algorithm.visualise(best_eval_list, iteration_eval_list)
 
     # Reset the stdout to the original

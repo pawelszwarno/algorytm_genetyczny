@@ -148,13 +148,10 @@ def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_un
 
 
 # funkcja do stworzenia grafu, listy ciężarówek i listy zleceń:
-def create_structures():
+def create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, max_pallets):
     # graf:
-    rows_cols = variables["structures_data"]["rows_cols"]
-    low_adj_matrix = variables["structures_data"]["low_adj_matrix"]
-    high_adj_matrix = variables["structures_data"]["high_adj_matrix"]
-    n_of_orders = variables["structures_data"]["n_of_orders"]
-    max_pallets = variables["structures_data"]["max_pallets"]
+    Order.reset_id()
+    Truck.reset_id()
     g = Graph(rows_cols, rows_cols)
     g.create_adj_matrix(low_adj_matrix, high_adj_matrix)
     # lista ciężarówek:
@@ -231,10 +228,6 @@ def selection_tour(population_scores: List[tuple[int, int]], population_size: in
     return selected
 
 
-# AKTUALNIE ALGORYTM DZIAŁA w następujący sposób:
-# są do wyboru 3 selection_type wybierane przy wywołaniu (ruletka do napisania, ranking na pewno działa poprawnie, nwm jak touranment)
-# n_pop - globalna zmienna z variables decyduje o wielkości populacji
-# do następnego pokolenia brany jest jeden z rodziców z równą szansą
 def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
     population = generate_solution(truck_list, order_lst, variables["structures_data"]['n_large_trucks'], variables["structures_data"]['n_small_trucks'])
     best_eval_list = []

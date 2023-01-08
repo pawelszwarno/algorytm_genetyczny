@@ -9,7 +9,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("TkAgg")
-import src.algorithm
 
 
 class Redirect():
@@ -36,9 +35,6 @@ ds_window.title("Data Structures - Variable Setter")
 
 mainFrame = tk.Frame(ds_window)
 mainFrame.grid()
-
-# var_names = ["SIMULATION_TIME", "speed_l", "capacity_l", "speed_s", "capacity_s", "n_small_trucks",
-#              "n_large_trucks", "n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent"]
 
 integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
                 "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets"]
@@ -136,8 +132,15 @@ def save_str_values():
 
 
 def create_struct():
+    import src.algorithm
+    rows_cols = variables["structures_data"]["rows_cols"]
+    low_adj_matrix = variables["structures_data"]["low_adj_matrix"]
+    high_adj_matrix = variables["structures_data"]["high_adj_matrix"]
+    n_of_orders = variables["structures_data"]["n_of_orders"]
+    max_pallets = variables["structures_data"]["max_pallets"]
+    
     global g, trucks_list, orders_lst
-    g, trucks_list, orders_lst = src.algorithm.create_structures()
+    g, trucks_list, orders_lst = src.algorithm.create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, max_pallets)
 
     old_stdout = sys.stdout
 
@@ -261,7 +264,7 @@ def get_uncomplete_sol_selection_type():
     elif 'selected' in r2_states:
         variables['algorithm_data']['selection_type'] = "selection_tour"
     elif 'selected' in r3_states:
-        variables['algorithm_data']['selection_type'] = "selection_prop"
+        variables['algorithm_data']['selection_type'] = "selection_roulette"
     elif 'selected' in r4_states:
         variables['algorithm_data']['selection_type'] = "selection_rank"
     
@@ -357,7 +360,7 @@ def create_alg_window():
     r1.grid(row=7, column=1, columnspan=2)
     r2 = ttk.Radiobutton(alg_window, text="selection_tour", variable=selection_type_var, value="selection_tour")
     r2.grid(row=7, column=2, columnspan=2)
-    r3 = ttk.Radiobutton(alg_window, text="selection_prop", variable=selection_type_var, value="selection_prop")
+    r3 = ttk.Radiobutton(alg_window, text="selection_roulette", variable=selection_type_var, value="selection_roulette")
     r3.grid(row=8, column=1, columnspan=2)
     r4 = ttk.Radiobutton(alg_window, text="selection_rank", variable=selection_type_var, value="selection_rank")
     r4.grid(row=8, column=2, columnspan=2)
