@@ -47,7 +47,6 @@ class Order:
             self.deadline = randint(1, variables["structures_data"]["SIMULATION_TIME"])
         else:
             self.deadline = deadline
-        self.__class__.unique += 1
 
     def __repr__(self):
         return f"(id={self.index}, v={self.vertex}, n_p={self.n_pallets}, dl={self.deadline})"
