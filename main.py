@@ -1,13 +1,11 @@
-def main():
+def main(g, trucks_list, orders_lst):
 
     import json
     from pathlib import Path
     import src.algorithm as algorithm
-    from src.classes import Order, Truck, TruckType, Graph
-    from src.algorithm import visualise
+    from src.classes import Order, Truck
     from io import StringIO
     import sys
-    from create_struct import g, trucks_list, orders_lst
     
     cwd = Path().cwd()
     json_path = cwd / 'data' / 'variables.json'

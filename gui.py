@@ -41,9 +41,9 @@ mainFrame.grid()
 #              "n_large_trucks", "n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent"]
 
 integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
-                "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders"]
-structures_vars = ["SIMULATION_TIME", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "n_small_trucks", 
-                   "n_large_trucks", "speed_s", "capacity_s", "speed_l", "capacity_l"]
+                "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets"]
+structures_vars = ["SIMULATION_TIME", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets",
+                   "n_small_trucks", "n_large_trucks", "speed_s", "capacity_s", "speed_l", "capacity_l"]
 
 # save to json
 def save_json():
@@ -54,7 +54,6 @@ def save_json():
         json.dump(variables, f)
 
 
-#TODO: validate added variables like n_of_orders, and graph connected vars:
 def validate_data_and_append(checked_value, structure_var):
     # first validate and append for structures_vars list:
     if len(checked_value) == 0:
@@ -64,6 +63,7 @@ def validate_data_and_append(checked_value, structure_var):
             int_value = int(checked_value)
             if int_value - float(checked_value) != 0:
                 return f'{structure_var} should be integer'
+
             if structure_var == 'n_small_trucks':
                 if int_value < 0:
                     return f'{structure_var} should be non-negative'
@@ -72,6 +72,15 @@ def validate_data_and_append(checked_value, structure_var):
                     return f'{structure_var} should be non-negative'
                 if int_value + variables['structures_data']['n_small_trucks'] == 0:
                     return f'There should be at least one truck'
+
+            if structure_var == 'low_adj_matrix':
+                if int_value < 0:
+                    return f'{structure_var} should be non-negative'
+            elif structure_var == 'high_adj_matrix':
+                if int_value < 0:
+                    return f'{structure_var} should be non-negative'
+                if int_value < variables['structures_data']['low_adj_matrix']:
+                    return f'{structure_var} should be greater than low_adj_matrix'
             else:
                 if int_value <= 0:
                     return f'{structure_var} should be positive'
@@ -122,11 +131,24 @@ def save_str_values():
         messagebox.showerror('Value Error', msg)
     else:
         save_json()
+    create_struct()
     create_alg_window()
 
 
 def create_struct():
-    src.algorithm.create_structures()
+    global g, trucks_list, orders_lst
+    g, trucks_list, orders_lst = src.algorithm.create_structures()
+
+    old_stdout = sys.stdout
+
+    sys.stdout = Redirect(text)
+    print("Macierz G: \n {}".format(g))
+    print("Lista zleceń:")
+    for zlecenie in orders_lst:
+        print("{}".format(zlecenie))
+
+
+    sys.stdout = old_stdout
     
     
 def show_plot():
@@ -161,7 +183,8 @@ def run_algorithm():
     # function used in "run algorithm" button
     # that saves the output of main()
     global output
-    output = main.main()
+    output = main.main(g, trucks_list, orders_lst)
+    text_alg.insert('end', output)
 
 
 def show_output():
@@ -197,12 +220,10 @@ for i in range(len(structures_vars)):
 
 # Create a button to get the values from the entries:
 save_values_button = tk.Button(ds_window, text="Save Values", command=save_str_values)
-save_values_button.grid(row=10, column=0, columnspan=2)
+save_values_button.grid(row=10, column=2, columnspan=1)
 
-create_struct_button = tk.Button(ds_window, text="Create struct", command=create_struct)
-create_struct_button.grid(row=10, column=3, columnspan=2)
-
-#TODO: button to display the data structures:
+text = tk.Text(ds_window, width=200, height=10)
+text.grid(row=11,columnspan=5, sticky="NSEW")
 
 # -------------------------------------ALGORYTM WINDOW-------------------------------------
 algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent", "uncomplete_sol", "selection_type"]
@@ -332,13 +353,13 @@ def create_alg_window():
     # else:
     #     selection_type.initialize("selection")
 
-    r1 = ttk.Radiobutton(alg_window, text="selection")
+    r1 = ttk.Radiobutton(alg_window, text="selection", variable=selection_type_var, value="selection")
     r1.grid(row=7, column=1, columnspan=2)
-    r2 = ttk.Radiobutton(alg_window, text="selection_tour")
+    r2 = ttk.Radiobutton(alg_window, text="selection_tour", variable=selection_type_var, value="selection_tour")
     r2.grid(row=7, column=2, columnspan=2)
-    r3 = ttk.Radiobutton(alg_window, text="selection_prop")
+    r3 = ttk.Radiobutton(alg_window, text="selection_prop", variable=selection_type_var, value="selection_prop")
     r3.grid(row=8, column=1, columnspan=2)
-    r4 = ttk.Radiobutton(alg_window, text="selection_rank")
+    r4 = ttk.Radiobutton(alg_window, text="selection_rank", variable=selection_type_var, value="selection_rank")
     r4.grid(row=8, column=2, columnspan=2)
     
     save_alg_values_button = tk.Button(alg_window, text="Save algorithm param.", command=save_alg_values)
@@ -350,8 +371,16 @@ def create_alg_window():
     show_results_button = tk.Button(alg_window, text="Show Results", command=show_plot)
     show_results_button.grid(row=10, column=2, sticky=tk.E + tk.W)
 
-    show_output_button = tk.Button(alg_window, text="Show output", command=show_output)
-    show_output_button.grid(row=10, column=3, sticky=tk.E + tk.W)
+    global text_alg
+    text_alg = tk.Text(alg_window, width=200, height=10)
+    text_alg.grid(row=11, columnspan=5, sticky="NSEW")
+    alg_window.resizable(False, False)
+
+    old_stdout = sys.stdout
+
+    sys.stdout = Redirect(text_alg)
+
+    sys.stdout = old_stdout
     
 
 # text = tk.Text(window, width=200, height=10)

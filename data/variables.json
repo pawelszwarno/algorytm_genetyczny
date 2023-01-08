@@ -1,1 +1,30 @@
-{"structures_data": {"SIMULATION_TIME": 720, "rows_cols": 6, "low_adj_matrix": 1, "high_adj_matrix": 10, "n_of_orders": 40, "n_small_trucks": 5, "n_large_trucks": 5, "speed_s": 2.0, "capacity_s": 5, "speed_l": 1.0, "capacity_l": 10}, "algorithm_data": {"n_pop": 50.0, "n_iterations": 100.0, "penalty_factor": 100.0, "r_mutation": 0.5, "parent_percent": 0.5, "uncomplete_sol": false, "selection_type": "selection_rank"}}
+{
+  "structures_data":
+  {
+    "SIMULATION_TIME": 720,
+    "rows_cols": 6,
+    "low_adj_matrix": 1,
+    "high_adj_matrix": 10,
+    "n_of_orders": 40,
+    "max_pallets": 10,
+    "n_small_trucks": 5,
+    "n_large_trucks": 5,
+    "speed_s": 2.0,
+    "capacity_s": 5,
+    "speed_l": 1.0,
+    "capacity_l": 10
+  },
+  "algorithm_data":
+  {
+    "n_pop": 50,
+    "n_iterations": 100,
+    "penalty_factor": 100.0,
+    "r_mutation": 0.5,
+    "parent_percent": 10.0,
+    "uncomplete_sol": true,
+    "selection_type": "selection"
+  },
+  "Graph": [[4, 7, 8, 8, 4, 9], [7, 6, 6, 6, 6, 9], [8, 6, 1, 1, 7, 4] [8 6 1 1 8 8]
+ [4 6 7 8 4 9]
+ [9 9 4 8 9 4]]
+}

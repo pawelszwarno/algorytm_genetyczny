@@ -154,6 +154,7 @@ def create_structures():
     low_adj_matrix = variables["structures_data"]["low_adj_matrix"]
     high_adj_matrix = variables["structures_data"]["high_adj_matrix"]
     n_of_orders = variables["structures_data"]["n_of_orders"]
+    max_pallets = variables["structures_data"]["max_pallets"]
     g = Graph(rows_cols, rows_cols)
     g.create_adj_matrix(low_adj_matrix, high_adj_matrix)
     # lista ciężarówek:
@@ -161,7 +162,7 @@ def create_structures():
     for _ in range(variables["structures_data"]['n_large_trucks']):
         trucks_list.append(Truck(TruckType.LARGE))
     # lista zleceń:
-    orders_lst = [Order(g, 7) for _ in range(n_of_orders)]
+    orders_lst = [Order(g, max_pallets=max_pallets) for _ in range(n_of_orders)]
     return g, trucks_list, orders_lst
 
  
