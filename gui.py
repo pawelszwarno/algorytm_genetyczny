@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import json
 from pathlib import Path
 import main
@@ -221,13 +221,12 @@ create_struct_button.grid(row=10, column=3, columnspan=2)
 #TODO: button to display the data structures:
 
 # -------------------------------------ALGORYTM WINDOW-------------------------------------
-algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent"]
+algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent", "uncomplete_sol", "selection_type"]
 integer_alg_vars = ["n_pop", "n_iteration"]
 
 
 # Create a function to save the values from the entries
 def save_alg_values():
-        # Create a list to hold the variables
     global variables
     try:
         for idx, entry in enumerate(entries_alg):
@@ -239,15 +238,29 @@ def save_alg_values():
     except ValueError:
         messagebox.showerror('Value Error', msg)
     else:
-        # print(variables)
+        get_uncomplete_sol_selection_type()
         save_json()
     
-def get_values_unc_sol_sele():
-    value_uc_sol = uncomplete_sol.get()
-    value_select = selection_type.get()
-    variables["algorithm_data"]["uncomplete_sol"] = value_uc_sol
-    variables["algorithm_data"]["selection_type"] = value_select
+def get_uncomplete_sol_selection_type():
+    c1_states = c1.state()
+    r1_states = r1.state()
+    r2_states = r2.state()
+    r3_states = r3.state()
+    r4_states = r4.state()
+    if 'selected' in c1_states:
+        variables['algorithm_data']['uncomplete_sol'] = True
+    else:
+        variables['algorithm_data']['uncomplete_sol'] = False
+    if 'selected' in r1_states:
+        variables['algorithm_data']['selection_type'] = "selection"
+    elif 'selected' in r2_states:
+        variables['algorithm_data']['selection_type'] = "selection_tour"
+    elif 'selected' in r3_states:
+        variables['algorithm_data']['selection_type'] = "selection_prop"
+    elif 'selected' in r4_states:
+        variables['algorithm_data']['selection_type'] = "selection_rank"
     
+
 def validate_data_and_append_alg(checked_value, algorithm_vars):
     # first validate and append for structures_vars list:
     if len(checked_value) == 0:
@@ -277,7 +290,6 @@ def validate_data_and_append_alg(checked_value, algorithm_vars):
             return f'{algorithm_vars} should be integer'
 
         else:
-            print(variables)
             variables["algorithm_data"][algorithm_vars] = int_value
             return 'Success'
 
@@ -316,7 +328,7 @@ def create_alg_window():
     # Create the entries and add them to the window
     global entries_alg
     entries_alg = []
-    for i in range(len(algorithm_vars)):
+    for i in range(len(algorithm_vars)-2):
         # Create a label for the entry
         label_alg = tk.Label(alg_window, text="{}".format(algorithm_vars[i]))
         label_alg.grid(row=(i//5)*2+1, column=i % 5)
@@ -327,6 +339,33 @@ def create_alg_window():
             entry.insert(tk.END, init_variables['algorithm_data'][algorithm_vars[i]])
         entry.grid(row=(i//5)*2+2, column=i % 5)
         entries_alg.append(entry)
+    
+    global uncomplete_sol_var, selection_type_var
+    uncomplete_sol_var = tk.BooleanVar()
+    selection_type_var = tk.StringVar()
+    
+    # Checkbox and radiobox section
+    # if init_variables is not None:
+    #     uncomplete_sol_var.set(init_variables['algorithm_data']['uncomplete_sol'])
+    
+    global c1, r1, r2, r3, r4
+    c1 = ttk.Checkbutton(alg_window, text="Allow creating uncomplete solutions during crossing",
+                            variable=uncomplete_sol_var, onvalue=True, offvalue=False)
+    c1.grid(row=6, column=2)
+
+    # if init_variables is not None:
+    #     selection_type.set(init_variables['algorithm_data']["selection_type"])
+    # else:
+    #     selection_type.initialize("selection")
+
+    r1 = ttk.Radiobutton(alg_window, text="selection", var=selection_type_var, value = "selection")
+    r1.grid(row=7, column=1, columnspan=2)
+    r2 = ttk.Radiobutton(alg_window, text="selection_tour", var=selection_type_var, value = "selection_tour")
+    r2.grid(row=7, column=2, columnspan=2)
+    r3 = ttk.Radiobutton(alg_window, text="selection_prop", var=selection_type_var, value = "selection_prop")
+    r3.grid(row=8, column=1, columnspan=2)
+    r4 = ttk.Radiobutton(alg_window, text="selection_rank", var=selection_type_var, value = "selection_rank")
+    r4.grid(row=8, column=2, columnspan=2)
     
     save_alg_values_button = tk.Button(alg_window, text="Save algorithm param.", command=save_alg_values)
     save_alg_values_button.grid(row=10, column=0, sticky=tk.E + tk.W)
@@ -339,37 +378,6 @@ def create_alg_window():
 
     show_output_button = tk.Button(alg_window, text="Show output", command=show_output)
     show_output_button.grid(row=10, column=3, sticky=tk.E + tk.W)
-
-    show_values_button = tk.Button(alg_window, text="Uncomplete sol, selection", command=get_values_unc_sol_sele)
-    show_values_button.grid(row=10, column=4, sticky=tk.E + tk.W)
-    
-    global uncomplete_sol, selection_type
-    uncomplete_sol = tk.BooleanVar()
-    selection_type = tk.StringVar()
-    # Checkbox and radiobox section
-    if init_variables is not None:
-        uncomplete_sol.set(init_variables['algorithm_data']['uncomplete_sol'])
-    
-    c1 = tk.Checkbutton(alg_window, text="Allow creating uncomplete solutions during crossing",
-                            variable=uncomplete_sol, onvalue=True, offvalue=False)
-    c1.grid(row=6, column=2)
-
-    if init_variables is not None:
-        selection_type.set(init_variables['algorithm_data']["selection_type"])
-    else:
-        selection_type.initialize("selection")
-    r1 = tk.Radiobutton(alg_window, text="selection",
-                        variable=selection_type, value="selection")
-    r1.grid(row=7, column=1, columnspan=2)
-    r2 = tk.Radiobutton(alg_window, text="selection_tour",
-                        variable=selection_type, value="selection_tour")
-    r2.grid(row=7, column=2, columnspan=2)
-    r3 = tk.Radiobutton(alg_window, text="selection_prop",
-                        variable=selection_type, value="selection_roulette")
-    r3.grid(row=8, column=1, columnspan=2)
-    r4 = tk.Radiobutton(alg_window, text="selection_rank",
-                        variable=selection_type, value="selection_rank")
-    r4.grid(row=8, column=2, columnspan=2)
     
 
 # text = tk.Text(window, width=200, height=10)
