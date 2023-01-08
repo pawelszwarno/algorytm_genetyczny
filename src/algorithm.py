@@ -160,6 +160,8 @@ def create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, m
         trucks_list.append(Truck(TruckType.LARGE))
     # lista zleceń:
     orders_lst = [Order(g, max_pallets=max_pallets) for _ in range(n_of_orders)]
+    Order.reset_id()
+    Truck.reset_id()
     return g, trucks_list, orders_lst
 
  

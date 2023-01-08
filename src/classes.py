@@ -52,7 +52,7 @@ class Order:
         return f"(id={self.index}, v={self.vertex}, n_p={self.n_pallets}, dl={self.deadline})"
 
     def __str__(self):
-        return f"(id={self.index}, destination_idx={self.vertex}, number_of_pallets={self.n_pallets})"
+        return f"(id={self.index}, destination_idx={self.vertex}, number_of_pallets={self.n_pallets}, deadline={self.deadline})"
 
     @classmethod
     def reset_id(cls):
