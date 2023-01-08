@@ -38,7 +38,7 @@ mainFrame = tk.Frame(ds_window)
 mainFrame.grid()
 
 # var_names = ["SIMULATION_TIME", "speed_l", "capacity_l", "speed_s", "capacity_s", "n_small_trucks",
-#              "n_large_trucks", "n_pop", "n_iteration", "penalty_factor", "r_mutation", "parent_percent"]
+#              "n_large_trucks", "n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent"]
 
 integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
                 "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders"]
@@ -55,36 +55,32 @@ def save_json():
 
 
 #TODO: validate added variables like n_of_orders, and graph connected vars:
-def validate_data_and_append(checked_value, structures_vars):
+def validate_data_and_append(checked_value, structure_var):
     # first validate and append for structures_vars list:
     if len(checked_value) == 0:
-        return f'{structures_vars} should be filled'
-    if structures_vars in integer_str_vars:
+        return f'{structure_var} should be filled'
+    if structure_var in integer_str_vars:
         try:
             int_value = int(checked_value)
             if int_value - float(checked_value) != 0:
-                return f'{structures_vars} should be integer'
-            if structures_vars == 'n_small_trucks':
+                return f'{structure_var} should be integer'
+            if structure_var == 'n_small_trucks':
                 if int_value < 0:
-                    return f'{structures_vars} should be non-negative'
-            elif structures_vars == 'n_large_trucks':
+                    return f'{structure_var} should be non-negative'
+            elif structure_var == 'n_large_trucks':
                 if int_value < 0:
-                    return f'{structures_vars} should be non-negative'
-                # TODO: zmien to, żeby zawsze brało 'n_large_trucks' a nie było zależne od kolejności
+                    return f'{structure_var} should be non-negative'
                 if int_value + variables['structures_data']['n_small_trucks'] == 0:
                     return f'There should be at least one truck'
-            # elif var_name == 'r_cross':
-            #     if int_value < 0:
-            #         return f'{var_name} should be non-negative'
             else:
                 if int_value <= 0:
-                    return f'{structures_vars} should be positive'
+                    return f'{structure_var} should be positive'
 
         except ValueError:
-            return f'{structures_vars} should be integer'
+            return f'{structure_var} should be integer'
 
         else:
-            variables["structures_data"][structures_vars] = int_value
+            variables["structures_data"][structure_var] = int_value
             return 'Success'
 
     else:
@@ -93,26 +89,14 @@ def validate_data_and_append(checked_value, structures_vars):
                 return "Please use '.' as a decimal separator, instead of ','"
             # raises ValueError when conversion is not possible
             float_value = float(checked_value)
-
-            if structures_vars == 'r_mutation':
-                if float_value > 1:
-                    return 'r_mutation should be lower or equal to 1'
-                if float_value < 0:
-                    return 'r_mutation should be higher or equal to 0'
-            elif structures_vars == 'parent_percent':
-                if float_value > 100:
-                    return 'parent_percent should be lower or equal to 100'
-                if float_value < 0:
-                    return 'r_mutation should be higher or equal to 0'
-            else:
-                if float_value <= 0:
-                    return f'{structures_vars} should be positive'
+            if float_value <= 0:
+                return f'{structure_var} should be positive'
 
         except ValueError:
-            return f'{structures_vars} should be float'
+            return f'{structure_var} should be float'
 
         else:
-            variables["structures_data"][structures_vars] = float_value
+            variables["structures_data"][structure_var] = float_value
             return 'Success'
     
 
@@ -120,10 +104,13 @@ def validate_data_and_append(checked_value, structures_vars):
 def save_str_values():
         # Create a list to hold the variables
     global variables
-    variables = {
-                "structures_data": {},
-                "algorithm_data": {},
-            }
+    if init_variables is None:
+        variables = {
+                    "structures_data": {},
+                    "algorithm_data": {},
+                }
+    else:
+        variables = init_variables.copy()
     try:
         for idx, entry in enumerate(entries):
             checked_value = entry.get()
@@ -139,10 +126,7 @@ def save_str_values():
 
 
 def create_struct():
-    src.algorithm.create_structures(variables['structures_data']["rows_cols"], 
-                                    variables['structures_data']["low_adj_matrix"], 
-                                    variables['structures_data']["high_adj_matrix"], 
-                                    variables['structures_data']["n_of_orders"])
+    src.algorithm.create_structures()
     
     
 def show_plot():
@@ -222,7 +206,7 @@ create_struct_button.grid(row=10, column=3, columnspan=2)
 
 # -------------------------------------ALGORYTM WINDOW-------------------------------------
 algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent", "uncomplete_sol", "selection_type"]
-integer_alg_vars = ["n_pop", "n_iteration"]
+integer_alg_vars = ["n_pop", "n_iterations"]
 
 
 # Create a function to save the values from the entries
@@ -261,36 +245,24 @@ def get_uncomplete_sol_selection_type():
         variables['algorithm_data']['selection_type'] = "selection_rank"
     
 
-def validate_data_and_append_alg(checked_value, algorithm_vars):
+def validate_data_and_append_alg(checked_value, algorithm_var):
     # first validate and append for structures_vars list:
     if len(checked_value) == 0:
-        return f'{algorithm_vars} should be filled'
-    if algorithm_vars in integer_str_vars:
+        return f'{algorithm_var} should be filled'
+    if algorithm_var in integer_alg_vars:
         try:
             int_value = int(checked_value)
             if int_value - float(checked_value) != 0:
-                return f'{algorithm_vars} should be integer'
-            if algorithm_vars == 'n_small_trucks':
-                if int_value < 0:
-                    return f'{algorithm_vars} should be non-negative'
-            elif algorithm_vars == 'n_large_trucks':
-                if int_value < 0:
-                    return f'{algorithm_vars} should be non-negative'
-                # TODO: zmien to, żeby zawsze brało 'n_large_trucks' a nie było zależne od kolejności
-                if int_value + variables['structures_data']['n_small_trucks'] == 0:
-                    return f'There should be at least one truck'
-            # elif var_name == 'r_cross':
-            #     if int_value < 0:
-            #         return f'{var_name} should be non-negative'
-            else:
-                if int_value <= 0:
-                    return f'{algorithm_vars} should be positive'
+                return f'{algorithm_var} should be integer'
+
+            if int_value <= 0:
+                return f'{algorithm_var} should be positive'
 
         except ValueError:
-            return f'{algorithm_vars} should be integer'
+            return f'{algorithm_var} should be integer'
 
         else:
-            variables["algorithm_data"][algorithm_vars] = int_value
+            variables["algorithm_data"][algorithm_var] = int_value
             return 'Success'
 
     else:
@@ -300,25 +272,25 @@ def validate_data_and_append_alg(checked_value, algorithm_vars):
             # raises ValueError when conversion is not possible
             float_value = float(checked_value)
 
-            if algorithm_vars == 'r_mutation':
+            if algorithm_var == 'r_mutation':
                 if float_value > 1:
                     return 'r_mutation should be lower or equal to 1'
                 if float_value < 0:
                     return 'r_mutation should be higher or equal to 0'
-            elif algorithm_vars == 'parent_percent':
+            elif algorithm_var == 'parent_percent':
                 if float_value > 100:
                     return 'parent_percent should be lower or equal to 100'
                 if float_value < 0:
                     return 'r_mutation should be higher or equal to 0'
             else:
                 if float_value <= 0:
-                    return f'{algorithm_vars} should be positive'
+                    return f'{algorithm_var} should be positive'
 
         except ValueError:
-            return f'{algorithm_vars} should be float'
+            return f'{algorithm_var} should be float'
 
         else:
-            variables["algorithm_data"][algorithm_vars] = float_value
+            variables["algorithm_data"][algorithm_var] = float_value
             return 'Success'
         
 
@@ -345,8 +317,10 @@ def create_alg_window():
     selection_type_var = tk.StringVar()
     
     # Checkbox and radiobox section
-    # if init_variables is not None:
-    #     uncomplete_sol_var.set(init_variables['algorithm_data']['uncomplete_sol'])
+    if init_variables is not None:
+        uncomplete_sol_var.initialize(init_variables['algorithm_data']['uncomplete_sol'])
+    else:
+        uncomplete_sol_var.initialize(False)
     
     global c1, r1, r2, r3, r4
     c1 = ttk.Checkbutton(alg_window, text="Allow creating uncomplete solutions during crossing",
@@ -358,13 +332,13 @@ def create_alg_window():
     # else:
     #     selection_type.initialize("selection")
 
-    r1 = ttk.Radiobutton(alg_window, text="selection", var=selection_type_var, value = "selection")
+    r1 = ttk.Radiobutton(alg_window, text="selection")
     r1.grid(row=7, column=1, columnspan=2)
-    r2 = ttk.Radiobutton(alg_window, text="selection_tour", var=selection_type_var, value = "selection_tour")
+    r2 = ttk.Radiobutton(alg_window, text="selection_tour")
     r2.grid(row=7, column=2, columnspan=2)
-    r3 = ttk.Radiobutton(alg_window, text="selection_prop", var=selection_type_var, value = "selection_prop")
+    r3 = ttk.Radiobutton(alg_window, text="selection_prop")
     r3.grid(row=8, column=1, columnspan=2)
-    r4 = ttk.Radiobutton(alg_window, text="selection_rank", var=selection_type_var, value = "selection_rank")
+    r4 = ttk.Radiobutton(alg_window, text="selection_rank")
     r4.grid(row=8, column=2, columnspan=2)
     
     save_alg_values_button = tk.Button(alg_window, text="Save algorithm param.", command=save_alg_values)
