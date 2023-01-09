@@ -212,7 +212,9 @@ def selection_rank(population_score: List[tuple[int, int]] = None, population_si
 def selection_roulette(population_scores: List[tuple[int, int]], population_size: int):
     scores = np.array([score for _, score in population_scores])
     total_score = scores.sum()
-    probabilities = scores / total_score
+    new_scores = 1/scores
+    new_total_score = new_scores.sum()
+    probabilities = new_scores / new_total_score
     indices = np.arange(len(population_scores))
     selected_indices = np.random.choice(indices, size=population_size, p=probabilities, replace=False)
     return [population_scores[i] for i in selected_indices]
