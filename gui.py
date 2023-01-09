@@ -41,6 +41,9 @@ integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
 structures_vars = ["SIMULATION_TIME", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets",
                    "n_small_trucks", "n_large_trucks", "speed_s", "capacity_s", "speed_l", "capacity_l"]
 
+proper_names_str = ["Simulation length (h)", "Number of rows and columns", "Min distance between stores", "Max distance between stores", "Number of orders",
+                "Maximum number of pallets in one order", "Number of small trucks", "Number of large trucks", "Speed of small trucks [in units]", "Capacity of small trucks [in pallets]",
+                "Speed of large trucks [in units]", "Capacity of large trucks [in pallets]"]
 # save to json
 def save_json():
     # Write the dictionary to a JSON file
@@ -210,7 +213,7 @@ def show_output():
 entries = []
 for i in range(len(structures_vars)):
     # Create a label for the entry
-    label = tk.Label(text="{}".format(structures_vars[i]))
+    label = tk.Label(text="{}".format(proper_names_str[i]))
     label.grid(row=(i//5)*2, column=i % 5)
 
     # Create the entry
@@ -227,7 +230,7 @@ for i in range(0, 6):
     Grid.columnconfigure(ds_window, i, weight=1)
     
 # Create a button to get the values from the entries:
-save_values_button = tk.Button(ds_window, text="Save Values", command=save_str_values)
+save_values_button = tk.Button(ds_window, text="Next Window", command=save_str_values)
 save_values_button.grid(row=10, column=2, columnspan=1)
 
 text = tk.Text(ds_window, width=200, height=10)
@@ -236,7 +239,7 @@ text.grid(row=11,columnspan=5, sticky="NSEW")
 # -------------------------------------ALGORYTM WINDOW-------------------------------------
 algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent", "uncomplete_sol", "selection_type"]
 integer_alg_vars = ["n_pop", "n_iterations"]
-
+proper_names_str = ["Number of members in the population", "Number of iterations", "Penalty factor [in units]", "Probability of mutation [0-1]", "Percentage of parents in the population"]
 
 # Create a function to save the values from the entries
 def save_alg_values():
@@ -335,7 +338,7 @@ def create_alg_window():
     entries_alg = []
     for i in range(len(algorithm_vars)-2):
         # Create a label for the entry
-        label_alg = tk.Label(alg_window, text="{}".format(algorithm_vars[i]))
+        label_alg = tk.Label(alg_window, text="{}".format(proper_names_str[i]))
         label_alg.grid(row=(i//5)*2+1, column=i % 5)
 
         # Create the entry
@@ -366,22 +369,22 @@ def create_alg_window():
     #     selection_type.initialize("selection")
 
 
-    r1 = ttk.Radiobutton(alg_window, text="selection", variable=selection_type_var, value="selection")
+    r1 = ttk.Radiobutton(alg_window, text="Best Members Selection", variable=selection_type_var, value="selection")
     r1.grid(row=7, column=1, columnspan=2)
-    r2 = ttk.Radiobutton(alg_window, text="selection_tour", variable=selection_type_var, value="selection_tour")
+    r2 = ttk.Radiobutton(alg_window, text="Tournament Selection", variable=selection_type_var, value="selection_tour")
     r2.grid(row=7, column=2, columnspan=2)
-    r3 = ttk.Radiobutton(alg_window, text="selection_roulette", variable=selection_type_var, value="selection_roulette")
+    r3 = ttk.Radiobutton(alg_window, text="Roulette Wheel Selection", variable=selection_type_var, value="selection_roulette")
     r3.grid(row=8, column=1, columnspan=2)
-    r4 = ttk.Radiobutton(alg_window, text="selection_rank", variable=selection_type_var, value="selection_rank")
+    r4 = ttk.Radiobutton(alg_window, text="Ranking Selection", variable=selection_type_var, value="selection_rank")
     r4.grid(row=8, column=2, columnspan=2)
     
-    save_alg_values_button = tk.Button(alg_window, text="Save algorithm param.", command=save_alg_values)
+    save_alg_values_button = tk.Button(alg_window, text="Save Algorithm Parameters", command=save_alg_values)
     save_alg_values_button.grid(row=10, column=1, columnspan=1)
     # Create a button for running algorithm
-    run_algorithm_button = tk.Button(alg_window, text="Run algorithm", command=run_algorithm)
+    run_algorithm_button = tk.Button(alg_window, text="Run Algorithm", command=run_algorithm)
     run_algorithm_button.grid(row=10, column=2, columnspan=1)
 
-    show_results_button = tk.Button(alg_window, text="Show Results", command=show_plot)
+    show_results_button = tk.Button(alg_window, text="Show Plot", command=show_plot)
     show_results_button.grid(row=10, column=3, columnspan=1)
 
     global text_alg
