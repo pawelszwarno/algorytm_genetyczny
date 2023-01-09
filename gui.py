@@ -220,7 +220,12 @@ for i in range(len(structures_vars)):
     entry.grid(row=(i//5)*2+1, column=i % 5)
     entries.append(entry)
 
+from tkinter import Grid
 
+Grid.rowconfigure(ds_window, 10, weight=1)
+for i in range(0, 6):
+    Grid.columnconfigure(ds_window, i, weight=1)
+    
 # Create a button to get the values from the entries:
 save_values_button = tk.Button(ds_window, text="Save Values", command=save_str_values)
 save_values_button.grid(row=10, column=2, columnspan=1)
@@ -321,6 +326,10 @@ def validate_data_and_append_alg(checked_value, algorithm_var):
 def create_alg_window():
     alg_window = tk.Tk()
     alg_window.title("Algorithm - Set Variables & Results")
+    
+    Grid.rowconfigure(alg_window, 10, weight=1)
+    for i in range(0, 6):
+        Grid.columnconfigure(alg_window, i, weight=1)
     # Create the entries and add them to the window
     global entries_alg
     entries_alg = []
@@ -356,6 +365,7 @@ def create_alg_window():
     # else:
     #     selection_type.initialize("selection")
 
+
     r1 = ttk.Radiobutton(alg_window, text="selection", variable=selection_type_var, value="selection")
     r1.grid(row=7, column=1, columnspan=2)
     r2 = ttk.Radiobutton(alg_window, text="selection_tour", variable=selection_type_var, value="selection_tour")
@@ -366,18 +376,17 @@ def create_alg_window():
     r4.grid(row=8, column=2, columnspan=2)
     
     save_alg_values_button = tk.Button(alg_window, text="Save algorithm param.", command=save_alg_values)
-    save_alg_values_button.grid(row=10, column=0, sticky=tk.E + tk.W)
+    save_alg_values_button.grid(row=10, column=1, columnspan=1)
     # Create a button for running algorithm
     run_algorithm_button = tk.Button(alg_window, text="Run algorithm", command=run_algorithm)
-    run_algorithm_button.grid(row=10, column=1, sticky=tk.E + tk.W)
+    run_algorithm_button.grid(row=10, column=2, columnspan=1)
 
     show_results_button = tk.Button(alg_window, text="Show Results", command=show_plot)
-    show_results_button.grid(row=10, column=2, sticky=tk.E + tk.W)
+    show_results_button.grid(row=10, column=3, columnspan=1)
 
     global text_alg
     text_alg = tk.Text(alg_window, width=200, height=10)
     text_alg.grid(row=11, columnspan=5, sticky="NSEW")
-    alg_window.resizable(False, False)
 
     old_stdout = sys.stdout
 
