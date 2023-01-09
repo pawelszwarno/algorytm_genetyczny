@@ -108,43 +108,45 @@ def mutation(new_sol: CompleteSolution, truck_list: List[Truck], r_mut = 1.0):
 
 
 def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution):
-    new_sol = [[] for _ in range(len(parent_1))]
+    new_sol_1 = [[] for _ in range(len(parent_1))]
+    new_sol_2 = [[] for _ in range(len(parent_2))]
     r_cross = randrange(variables["structures_data"]["n_of_orders"])
     for idx, truck_route in enumerate(parent_1):
         for idx_2, sol in enumerate(truck_route):
             if idx_2 < r_cross:
-                new_sol[idx].append(sol)
+                new_sol_1[idx].append(sol)
             else:
-                break
+                new_sol_2[idx].append(sol)
 
     for idx, truck_route in enumerate(parent_2):
         for idx_2, sol in enumerate(truck_route):
             if idx_2 < r_cross:
-                continue
+                new_sol_2[idx].append(sol)
             else:
-                new_sol[idx].append(sol)
-    return new_sol
+                new_sol_1[idx].append(sol)
+    return new_sol_1, new_sol_2
     
 
 def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_uncomplete: bool=False):
     if possibly_uncomplete:
         return crossing_with_possibly_uncomplete(parent_1, parent_2)
-    new_sol = [[] for _ in range(len(parent_1))]
+    new_sol_1 = [[] for _ in range(len(parent_1))]
+    new_sol_2 = [[] for _ in range(len(parent_2))]
     r_cross = randrange(variables["structures_data"]["n_of_orders"])
     for idx, truck_route in enumerate(parent_1):
         for sol in truck_route:
             if sol.n_order < r_cross:
-                new_sol[idx].append(sol)
+                new_sol_1[idx].append(sol)
             else:
-                continue
+                new_sol_2[idx].append(sol)
 
     for idx, truck_route in enumerate(parent_2):
         for sol in truck_route:
             if sol.n_order < r_cross:
-                continue
+                new_sol_2[idx].append(sol)
             else:
-                new_sol[idx].append(sol)
-    return new_sol
+                new_sol_1[idx].append(sol)
+    return new_sol_1, new_sol_2
 
 
 # funkcja do stworzenia grafu, listy ciężarówek i listy zleceń:
@@ -178,7 +180,7 @@ def selection_rank(population_score: List[tuple[int, int]] = None, population_si
         raise ValueError
 
     selected = []
-    population_score.sort(key = lambda x: x[1], reverse=1)
+    population_score.sort(key = lambda x: x[1])
     pop_rank = np.zeros(len(population_score)+1) 
 
     for i in range(len(population_score)):
@@ -223,7 +225,7 @@ def selection_tour(population_scores: List[tuple[int, int]], population_size: in
     while len(selected) < population_size:
         tour = sample(population, min(3, len(population)))
         tour_scores = [(index, score) for index, score in population_scores if index in tour]
-        tour_scores.sort(key = lambda x: x[1], reverse = True)
+        tour_scores.sort(key = lambda x: x[1])
         winner = tour_scores[0]
         selected.append(winner)
         population.remove(winner[0])
@@ -261,14 +263,32 @@ def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], orde
         
         for i in range(0, len(selected)-1, 2):
             parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
-            child = crossing(parent_1, parent_2, possibly_uncomplete=uncomplete_sol)
-            new_child = mutation(child, truck_list, r_mutation)
-            children.append(new_child)
+            child_1, child_2 = crossing(parent_1, parent_2, possibly_uncomplete=uncomplete_sol)
+            new_child_1 = mutation(child_1, truck_list, r_mutation)
+            new_child_2 = mutation(child_2, truck_list, r_mutation)
+            children.append(new_child_1)
+            children.append(new_child_2)
             # child2 = crossing(parent_1, parent_2, r_mutation)
             # children.append(child2)
-            children.append(choice([parent_1, parent_2]))
+            # children.append(choice([parent_1, parent_2]))
         print(best_eval)
-        population = children
+        
+        children_scores = []
+        for i in range(len(children)):
+            children_cost = objective_function(children[i], g, truck_list, order_lst)
+            children_scores.append((i, children_cost))
+        
+        selected_parents = selection_function(population_scores, round(variables["algorithm_data"]['n_pop'] * variables["algorithm_data"]['parent_percent']/100))       
+        selected_children = selection_function(children_scores, variables["algorithm_data"]['n_pop']-len(selected_parents))
+        
+        new_population = []
+        [new_population.append(population[selected_parents[i][0]]) for i in range(len(selected_parents))]
+        [new_population.append(children[selected_children[i][0]]) for i in range(len(selected_children))]
+        shuffle(new_population)
+        population = new_population
+
+
+        
         
     return best, best_eval, best_eval_list, iteration_eval_list
 
