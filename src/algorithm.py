@@ -60,7 +60,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
                 #     print("Zamówienie dowiezione na czas")
                 
                 if delivery_time > curr_order_info.deadline:
-                    penalty = penalty_factor * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
+                    penalty = penalty_factor * (delivery_time - curr_order_info.deadline) * delivered_pallets
                     # print("Deadline: {}".format(curr_order_info.deadline))
                     # print("Czas dowozu: {}".format(delivery_time))
                     # print("Kara jest równa {}".format(penalty))
@@ -214,11 +214,13 @@ def selection_rank(population_score: List[tuple[int, int]] = None, population_si
 
 # moja (PSu) implementacja ruletki
 def selection_roulette(population_scores: List[tuple[int, int]], population_size: int):
-    scores = np.array([score for _, score in population_scores])
-    total_score = scores.sum()
-    new_scores = 1/scores
-    new_total_score = new_scores.sum()
-    probabilities = new_scores / new_total_score
+    total_score = sum(score for _, score in population_scores)
+    if total_score != 0:
+        new_scores = np.array([total_score/score if score > 0 else total_score*10 for _, score in population_scores])
+        new_total_score = new_scores.sum()
+        probabilities = new_scores / new_total_score
+    else:
+        probabilities = [1 / len(population_scores)] * len(population_scores)
     indices = np.arange(len(population_scores))
     selected_indices = np.random.choice(indices, size=population_size, p=probabilities, replace=False)
     return [population_scores[i] for i in selected_indices]
