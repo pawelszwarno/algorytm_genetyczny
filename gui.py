@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, filedialog, Grid
 import json
+from jsonschema import validate
 from pathlib import Path
 import main
 import sys
@@ -11,7 +12,108 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 
-class Redirect():
+cwd = Path().cwd()
+json_path = cwd / 'data' / 'variables.json'
+json_schema_path = cwd / 'data' / 'json_schema.json'
+
+with open(json_schema_path) as jf:
+    schema = json.load(jf)
+try:
+    with open(json_path) as f:
+        init_variables = json.load(f)
+except FileNotFoundError:
+    init_variables = None
+
+# TODO: przenieś wszystkie zmienne globalne na początek pliku
+
+
+# Create a function to save the data_structures values from the entries:
+def save_str_values():
+        # Create a list to hold the variables
+    global variables
+    if init_variables is None:
+        variables = {
+                    "structures_data": {},
+                    "algorithm_data": {},
+                }
+    else:
+        variables = init_variables.copy()
+    try:
+        for idx, entry in enumerate(entries):
+            checked_value = entry.get()
+            msg = validate_data_and_append(
+                checked_value, structures_vars[idx])
+            if msg != 'Success':
+                raise ValueError
+    except ValueError:
+        messagebox.showerror('Value Error', msg)
+    else:
+        g, trucks_list, orders_lst = create_struct()
+        variables["Graph"] = g.matrix.tolist()
+        variables["truck_list"] = []
+        for truck in trucks_list:
+            variables["truck_list"].append({"type": f"{truck.type}", "index": truck.index})
+
+        variables["order_lst"] = []
+        for order in orders_lst:
+            variables["order_lst"].append({"n_pallets": order.n_pallets, "vertex": order.vertex,
+                                                              "deadline": order.deadline, "index": order.index})
+
+        save_json()
+        create_alg_window()
+
+
+# Uploading values from JSON file
+def upload_from_file():
+    uploaded_file = filedialog.askopenfile(filetypes=[('JSON file', '*.json')])
+    unvalidated_variables = json.load(uploaded_file)
+    validate(instance=unvalidated_variables, schema=schema)
+    global variables, init_variables
+    variables = unvalidated_variables.copy()
+    init_variables = variables.copy()
+    save_json()
+    ds_window.reopen()
+
+class App(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        self.title("Data Structures - Variable Setter")
+        self.eval('tk::PlaceWindow . center')
+
+        entries = []
+        for i in range(len(structures_vars)):
+            # Create a label for the entry
+            label = tk.Label(text="{}".format(structures_vars[i]))
+            label.grid(row=(i // 5) * 2, column=i % 5)
+
+            # Create the entry
+            entry = tk.Entry(self, width=20)
+            if init_variables is not None:
+                entry.insert(tk.END, init_variables['structures_data'][structures_vars[i]])
+            entry.grid(row=(i // 5) * 2 + 1, column=i % 5)
+            entries.append(entry)
+
+        Grid.rowconfigure(self, 10, weight=1)
+        for i in range(0, 6):
+            Grid.columnconfigure(self, i, weight=1)
+
+        save_values_button = tk.Button(self, text="Save Values", command=save_str_values)
+        save_values_button.grid(row=10, column=1, columnspan=1)
+
+        upload_from_file_button = tk.Button(self, text="Upload from file", command=upload_from_file)
+        upload_from_file_button.grid(row=10, column=3, columnspan=1)
+
+        text = tk.Text(self, width=200, height=10)
+        text.grid(row=11, columnspan=5, sticky="NSEW")
+
+    def reopen(self):
+        self.destroy()
+        self.__init__()
+
+
+
+
+class Redirect:
 
     def __init__(self, widget):
         self.widget = widget
@@ -21,20 +123,7 @@ class Redirect():
         self.widget.see("end")
 
 
-cwd = Path().cwd()
-json_path = cwd / 'data' / 'variables.json'
-try:
-    with open(json_path) as f:
-        init_variables = json.load(f)
-except FileNotFoundError:
-    init_variables = None
 
-# Create the main window
-ds_window = tk.Tk()
-ds_window.title("Data Structures - Variable Setter")
-
-mainFrame = tk.Frame(ds_window)
-mainFrame.grid()
 
 integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
                 "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets"]
@@ -44,13 +133,20 @@ structures_vars = ["SIMULATION_TIME", "rows_cols", "low_adj_matrix", "high_adj_m
 proper_names_str = ["Simulation length (h)", "Number of rows and columns", "Min distance between stores", "Max distance between stores", "Number of orders",
                 "Maximum number of pallets in one order", "Number of small trucks", "Number of large trucks", "Speed of small trucks [in units]", "Capacity of small trucks [in pallets]",
                 "Speed of large trucks [in units]", "Capacity of large trucks [in pallets]"]
+
+# Create the main window
+ds_window = App()
+
+mainFrame = tk.Frame(ds_window)
+mainFrame.grid()
+
 # save to json
 def save_json():
     # Write the dictionary to a JSON file
     cwd = Path.cwd()
     var_path = cwd / 'data' / 'variables.json'
     with open(var_path, "w") as f:
-        json.dump(variables, f)
+        json.dump(variables, f, indent=2)
 
 
 def validate_data_and_append(checked_value, structure_var):
@@ -108,30 +204,6 @@ def validate_data_and_append(checked_value, structure_var):
             return 'Success'
     
 
-# Create a function to save the data_structures values from the entries:
-def save_str_values():
-        # Create a list to hold the variables
-    global variables
-    if init_variables is None:
-        variables = {
-                    "structures_data": {},
-                    "algorithm_data": {},
-                }
-    else:
-        variables = init_variables.copy()
-    try:
-        for idx, entry in enumerate(entries):
-            checked_value = entry.get()
-            msg = validate_data_and_append(
-                checked_value, structures_vars[idx])
-            if msg != 'Success':
-                raise ValueError
-    except ValueError:
-        messagebox.showerror('Value Error', msg)
-    else:
-        save_json()
-    create_struct()
-    create_alg_window()
 
 
 def create_struct():
@@ -232,8 +304,6 @@ for i in range(len(structures_vars)):
     entry.grid(row=(i//5)*2+1, column=i % 5)
     entries.append(entry)
 
-from tkinter import Grid
-
 Grid.rowconfigure(ds_window, 10, weight=1)
 for i in range(0, 6):
     Grid.columnconfigure(ds_window, i, weight=1)
@@ -241,6 +311,9 @@ for i in range(0, 6):
 # Create a button to get the values from the entries:
 save_values_button = tk.Button(ds_window, text="Next Window", command=save_str_values)
 save_values_button.grid(row=10, column=2, columnspan=1)
+
+upload_from_file_button = tk.Button(ds_window, text="Upload from file", command=upload_from_file)
+upload_from_file_button.grid(row=10, column=3, columnspan=1)
 
 text = tk.Text(ds_window, width=200, height=10)
 text.grid(row=11,columnspan=5, sticky="NSEW")

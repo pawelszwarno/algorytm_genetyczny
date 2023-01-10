@@ -1,0 +1,111 @@
+{
+  "type": "object",
+  "properties": {
+    "Graph": {
+      "type": "array"
+    },
+    "algorithm_data": {
+      "type": "object",
+      "properties": {
+        "n_pop": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "n_iterations": {
+          "type": "number"
+        },
+        "penalty_factor": {
+          "type": "number"
+        },
+        "r_mutation": {
+          "type": "number"
+        },
+        "parent_percent": {
+          "type": "number"
+        },
+        "uncomplete_sol": {
+          "type": "boolean"
+        },
+        "selection_type": {
+          "type": "string"
+        }
+      }
+    },
+    "order_lst": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "n_pallets": {
+            "type": "number"
+          },
+          "vertex": {
+            "type": "number"
+          },
+          "deadline": {
+            "type": "number"
+          },
+          "index": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "structures_lst": {
+      "type": "object",
+      "properties": {
+        "SIMULATION_TIME": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rows_cols": {
+          "type": "number"
+        },
+        "low_adj_matrix": {
+          "type": "number"
+        },
+        "high_adj_matrix": {
+          "type": "number"
+        },
+        "n_of_orders": {
+          "type": "number"
+        },
+        "max_pallets": {
+          "type": "number"
+        },
+        "n_small_trucks": {
+          "type": "number"
+        },
+        "n_large_trucks": {
+          "type": "number"
+        },
+        "speed_s": {
+          "type": "number"
+        },
+        "capacity_s": {
+          "type": "number"
+        },
+        "speed_l": {
+          "type": "number"
+        },
+        "capacity_l": {
+          "type": "number"
+        }
+      }
+    },
+    "truck_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "index": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}
