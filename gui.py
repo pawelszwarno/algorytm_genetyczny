@@ -24,8 +24,6 @@ try:
 except FileNotFoundError:
     init_variables = None
 
-# TODO: przenieś wszystkie zmienne globalne na początek pliku
-
 
 # Create a function to save the data_structures values from the entries:
 def save_str_values():
