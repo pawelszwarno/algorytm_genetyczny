@@ -6,16 +6,16 @@ from random import randint
 from random import choice
 from enum import Enum
 from typing import List
-from src import variables
 
 
 class TruckType(Enum):
-    SMALL = 1
-    LARGE = 2
+    SMALL = "SMALL"
+    LARGE = "LARGE"
 
 
 class Order:
     unique = 0
+    simulation_time = None
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class Order:
         # czyli np. deadline 32 znaczy 1 dzień i 8h po rozpoczęciu mięsiąca
         # naszego horyzontu czasowego.
         if deadline is None:
-            self.deadline = randint(1, variables["structures_data"]["SIMULATION_TIME"])
+            self.deadline = randint(1, self.__class__.simulation_time)
         else:
             self.deadline = deadline
 
@@ -73,14 +73,18 @@ class SolutionTuple:
 
 class Truck:
     unique = 0
+    small_speed = None
+    small_capacity = None
+    large_speed = None
+    large_capacity = None
 
     def __init__(self, truck_type, index: int = None):
         if isinstance(truck_type, TruckType):
             self.type = truck_type
         else:
-            if truck_type == "SMALL":
+            if truck_type == "TruckType.SMALL":
                 self.type = TruckType.SMALL
-            elif truck_type == "LARGE":
+            elif truck_type == "TruckType.LARGE":
                 self.type = TruckType.LARGE
             else:
                 raise TypeError("Invalid truck type.")
@@ -92,11 +96,11 @@ class Truck:
             self.index = index
 
         if truck_type == TruckType.SMALL:
-            self.speed = variables["structures_data"]["speed_s"]
-            self.capacity = variables["structures_data"]["capacity_s"]
+            self.speed = self.__class__.small_speed
+            self.capacity = self.__class__.small_capacity
         elif truck_type == TruckType.LARGE:
-            self.speed = variables["structures_data"]["speed_l"]
-            self.capacity = variables["structures_data"]["capacity_l"]
+            self.speed = self.__class__.large_speed
+            self.capacity = self.__class__.large_capacity
 
         self.current_time = 0
         self.current_capacity = self.capacity

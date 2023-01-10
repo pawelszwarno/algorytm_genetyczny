@@ -1,15 +1,14 @@
 from src.classes import Order, Truck, SolutionTuple, Graph, TruckType, CompleteSolution
-from typing import List
+from typing import List, Dict
 from random import randint, choice, shuffle, random, sample, randrange
-from src import variables
 from copy import deepcopy
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int) -> List[CompleteSolution]:
+def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_large_truck: int, n_small_truck: int, n_pop: int) -> List[CompleteSolution]:
     population = []
-    for _ in range(variables["algorithm_data"]['n_pop']):
+    for _ in range(n_pop):
         solution = [[] for _ in range(n_large_truck+n_small_truck)]
         for order in orders_list:
             current_n_pallets = order.n_pallets
@@ -29,7 +28,7 @@ def generate_solution(trucks_list: List[Truck], orders_list: List[Order], n_larg
     return population
 
 
-def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list: List[Truck], order_list: List[Order], uncomplete_sol: bool=True):
+def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list: List[Truck], order_list: List[Order], penalty_factor: float, uncomplete_sol: bool=True):
     cost = 0
     for j in truck_list:
         j.current_capacity = j.capacity
@@ -61,7 +60,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
                 #     print("Zamówienie dowiezione na czas")
                 
                 if delivery_time > curr_order_info.deadline:
-                    penalty = variables["algorithm_data"]['penalty_factor'] * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
+                    penalty = penalty_factor * (delivery_time - curr_order_info.deadline) * (delivered_pallets)
                     # print("Deadline: {}".format(curr_order_info.deadline))
                     # print("Czas dowozu: {}".format(delivery_time))
                     # print("Kara jest równa {}".format(penalty))
@@ -75,7 +74,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
     if uncomplete_sol:
         for idx, pallets in enumerate(delivered_pallets_in_order):
             if order_list[idx].n_pallets > pallets:
-                penalty = variables["algorithm_data"]['penalty_factor']*0.1 * variables["structures_data"]['SIMULATION_TIME'] * (order_list[idx].n_pallets - pallets)
+                penalty = penalty_factor*0.1 * Order.simulation_time * (order_list[idx].n_pallets - pallets)
                 cost += penalty
                 
     return int(cost)
@@ -107,10 +106,10 @@ def mutation(new_sol: CompleteSolution, truck_list: List[Truck], r_mut = 1.0):
         return new_sol
 
 
-def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution):
+def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: CompleteSolution, n_of_orders):
     new_sol_1 = [[] for _ in range(len(parent_1))]
     new_sol_2 = [[] for _ in range(len(parent_2))]
-    r_cross = randrange(variables["structures_data"]["n_of_orders"])
+    r_cross = randrange(n_of_orders)
     for idx, truck_route in enumerate(parent_1):
         for idx_2, sol in enumerate(truck_route):
             if idx_2 < r_cross:
@@ -127,12 +126,12 @@ def crossing_with_possibly_uncomplete(parent_1: CompleteSolution, parent_2: Comp
     return new_sol_1, new_sol_2
     
 
-def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_uncomplete: bool=False):
+def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, n_of_orders, possibly_uncomplete: bool=False):
     if possibly_uncomplete:
-        return crossing_with_possibly_uncomplete(parent_1, parent_2)
+        return crossing_with_possibly_uncomplete(parent_1, parent_2, n_of_orders)
     new_sol_1 = [[] for _ in range(len(parent_1))]
     new_sol_2 = [[] for _ in range(len(parent_2))]
-    r_cross = randrange(variables["structures_data"]["n_of_orders"])
+    r_cross = randrange(n_of_orders)
     for idx, truck_route in enumerate(parent_1):
         for sol in truck_route:
             if sol.n_order < r_cross:
@@ -150,15 +149,20 @@ def crossing(parent_1: CompleteSolution, parent_2: CompleteSolution, possibly_un
 
 
 # funkcja do stworzenia grafu, listy ciężarówek i listy zleceń:
-def create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, max_pallets):
+def create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, max_pallets, n_small_trucks, n_large_trucks, capacity_s, speed_s, capacity_l, speed_l, simulation_time):
     # graf:
     Order.reset_id()
     Truck.reset_id()
+    Truck.small_capacity = capacity_s
+    Truck.small_speed = speed_s
+    Truck.large_capacity = capacity_l
+    Truck.large_speed = speed_l
+    Order.simulation_time = simulation_time
     g = Graph(rows_cols, rows_cols)
     g.create_adj_matrix(low_adj_matrix, high_adj_matrix)
     # lista ciężarówek:
-    trucks_list = [Truck(TruckType.SMALL) for _ in range(variables["structures_data"]['n_small_trucks'])]
-    for _ in range(variables["structures_data"]['n_large_trucks']):
+    trucks_list = [Truck(TruckType.SMALL) for _ in range(n_small_trucks)]
+    for _ in range(n_large_trucks):
         trucks_list.append(Truck(TruckType.LARGE))
     # lista zleceń:
     orders_lst = [Order(g, max_pallets=max_pallets) for _ in range(n_of_orders)]
@@ -234,23 +238,24 @@ def selection_tour(population_scores: List[tuple[int, int]], population_size: in
     return selected
 
 
-def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable, uncomplete_sol: bool):
-    population = generate_solution(truck_list, order_lst, variables["structures_data"]['n_large_trucks'], variables["structures_data"]['n_small_trucks'])
+def algorithm(variables: Dict, truck_list: List[Truck], order_lst: List[Order], g: Graph, selection_function: callable):
+    population = generate_solution(truck_list, order_lst, variables['structures_data']['n_large_trucks'], variables['structures_data']['n_small_trucks'], variables['algorithm_data']['n_pop'])
     best_eval_list = []
     iteration_eval_list = []
     best = population[0]
-    best_eval = objective_function(population[0], g, truck_list, order_lst, False)
+    best_eval = objective_function(population[0], g, truck_list, order_lst, variables['algorithm_data']['penalty_factor'], False)
     best_eval_list.append(best_eval)
     iteration_eval_list.append(best_eval)
     print("Najlepsze rozwiązanie w pierwszej iteracji: ")
     print(best)
     print("Wartość funkcji celu w pierwszej iteracji:")
     print(best_eval)
-    for _ in range(n_iteration):
+    for _ in range(variables['algorithm_data']['n_iterations']):
         children = []
         population_scores = []
+        print(f"ROZMIAR POPULACJI: {variables['algorithm_data']['n_pop']}")
         for i in range(variables["algorithm_data"]['n_pop']):
-            cost = objective_function(population[i], g, truck_list, order_lst)
+            cost = objective_function(population[i], g, truck_list, order_lst, variables["algorithm_data"]['penalty_factor'], variables["algorithm_data"]['uncomplete_sol'])
             population_scores.append((i, cost))
         selected = selection_function(population_scores, variables["algorithm_data"]['n_pop'])
         
@@ -265,19 +270,16 @@ def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], orde
         
         for i in range(0, len(selected)-1, 2):
             parent_1, parent_2 = population[selected[i][0]], population[selected[i+1][0]]
-            child_1, child_2 = crossing(parent_1, parent_2, possibly_uncomplete=uncomplete_sol)
-            new_child_1 = mutation(child_1, truck_list, r_mutation)
-            new_child_2 = mutation(child_2, truck_list, r_mutation)
+            child_1, child_2 = crossing(parent_1, parent_2, len(order_lst), possibly_uncomplete=variables["algorithm_data"]['uncomplete_sol'])
+            new_child_1 = mutation(child_1, truck_list, variables["algorithm_data"]['r_mutation'])
+            new_child_2 = mutation(child_2, truck_list, variables["algorithm_data"]['r_mutation'])
             children.append(new_child_1)
             children.append(new_child_2)
-            # child2 = crossing(parent_1, parent_2, r_mutation)
-            # children.append(child2)
-            # children.append(choice([parent_1, parent_2]))
         print(best_eval)
         
         children_scores = []
         for i in range(len(children)):
-            children_cost = objective_function(children[i], g, truck_list, order_lst)
+            children_cost = objective_function(children[i], g, truck_list, order_lst, variables["algorithm_data"]['penalty_factor'], variables["algorithm_data"]['uncomplete_sol'])
             children_scores.append((i, children_cost))
         
         selected_parents = selection_function(population_scores, round(variables["algorithm_data"]['n_pop'] * variables["algorithm_data"]['parent_percent']/100))       
@@ -290,8 +292,6 @@ def algorithm(n_iteration: int, r_mutation: float, truck_list: List[Truck], orde
         population = new_population
 
 
-        
-        
     return best, best_eval, best_eval_list, iteration_eval_list
 
 

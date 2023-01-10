@@ -141,9 +141,16 @@ def create_struct():
     high_adj_matrix = variables["structures_data"]["high_adj_matrix"]
     n_of_orders = variables["structures_data"]["n_of_orders"]
     max_pallets = variables["structures_data"]["max_pallets"]
-    
+    n_small_trucks = variables["structures_data"]['n_small_trucks']
+    n_large_trucks = variables["structures_data"]['n_large_trucks']
+    capacity_s = variables["structures_data"]['capacity_s']
+    speed_s = variables["structures_data"]['speed_s']
+    capacity_l = variables["structures_data"]['capacity_l']
+    speed_l = variables["structures_data"]['speed_l']
+    simulation_time = variables["structures_data"]['SIMULATION_TIME']
+
     global g, trucks_list, orders_lst
-    g, trucks_list, orders_lst = src.algorithm.create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, max_pallets)
+    g, trucks_list, orders_lst = src.algorithm.create_structures(rows_cols, low_adj_matrix, high_adj_matrix, n_of_orders, max_pallets, n_small_trucks, n_large_trucks, capacity_s, speed_s, capacity_l, speed_l, simulation_time)
 
     old_stdout = sys.stdout
 
@@ -155,7 +162,9 @@ def create_struct():
 
 
     sys.stdout = old_stdout
-    
+
+    return g, trucks_list, orders_lst
+
     
 def show_plot():
     plot_window = tk.Tk()
