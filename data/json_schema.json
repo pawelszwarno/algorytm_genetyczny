@@ -1,3 +1,4 @@
+
 {
   "type": "object",
   "properties": {
@@ -12,22 +13,29 @@
           "minimum": 1
         },
         "n_iterations": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         },
         "penalty_factor": {
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "r_mutation": {
-          "type": "number"
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         },
         "parent_percent": {
-          "type": "number"
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
         },
         "uncomplete_sol": {
           "type": "boolean"
         },
         "selection_type": {
-          "type": "string"
+          "type": "string",
+          "enum": ["selection", "selection_tour", "selection_roulette", "selection_rank"]
         }
       }
     },
@@ -37,16 +45,20 @@
         "type": "object",
         "properties": {
           "n_pallets": {
-            "type": "number"
+            "type": "integer",
+            "minimum": 1
           },
           "vertex": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "deadline": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "index": {
-            "type": "number"
+            "type": "integer",
+            "minimum": 0
           }
         }
       }
@@ -55,41 +67,52 @@
       "type": "object",
       "properties": {
         "SIMULATION_TIME": {
-          "type": "integer",
+          "type": "number",
           "minimum": 1
         },
         "rows_cols": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         },
         "low_adj_matrix": {
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "high_adj_matrix": {
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "n_of_orders": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         },
         "max_pallets": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         },
         "n_small_trucks": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 0
         },
         "n_large_trucks": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 0
         },
         "speed_s": {
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "capacity_s": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         },
         "speed_l": {
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "capacity_l": {
-          "type": "number"
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
@@ -99,10 +122,12 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": ["TruckType.SMALL","TruckType.LARGE"]
           },
           "index": {
-            "type": "number"
+            "type": "integer",
+            "minimum": 0
           }
         }
       }

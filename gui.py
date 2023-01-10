@@ -11,10 +11,21 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("TkAgg")
 
+integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
+                "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets"]
+structures_vars = ["SIMULATION_TIME", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets",
+                   "n_small_trucks", "n_large_trucks", "speed_s", "capacity_s", "speed_l", "capacity_l"]
+
+proper_names_str = ["Simulation length (h)", "Number of rows and columns", "Min distance between stores", "Max distance between stores", "Number of orders",
+                "Maximum number of pallets in one order", "Number of small trucks", "Number of large trucks", "Speed of small trucks [in units]", "Capacity of small trucks [in pallets]",
+                "Speed of large trucks [in units]", "Capacity of large trucks [in pallets]"]
+
+
 
 cwd = Path().cwd()
 json_path = cwd / 'data' / 'variables.json'
 json_schema_path = cwd / 'data' / 'json_schema.json'
+
 
 with open(json_schema_path) as jf:
     schema = json.load(jf)
@@ -75,13 +86,18 @@ def upload_from_file():
 class App(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+
+        mainFrame = tk.Frame(self)
+        mainFrame.grid()
+
         self.title("Data Structures - Variable Setter")
         self.eval('tk::PlaceWindow . center')
 
+        # Create the entries and add them to the window
         entries = []
         for i in range(len(structures_vars)):
             # Create a label for the entry
-            label = tk.Label(text="{}".format(structures_vars[i]))
+            label = tk.Label(text="{}".format(proper_names_str[i]))
             label.grid(row=(i // 5) * 2, column=i % 5)
 
             # Create the entry
@@ -95,7 +111,8 @@ class App(tk.Tk):
         for i in range(0, 6):
             Grid.columnconfigure(self, i, weight=1)
 
-        save_values_button = tk.Button(self, text="Save Values", command=save_str_values)
+        # Create a button to get the values from the entries:
+        save_values_button = tk.Button(self, text="Next Window", command=save_str_values)
         save_values_button.grid(row=10, column=1, columnspan=1)
 
         upload_from_file_button = tk.Button(self, text="Upload from file", command=upload_from_file)
@@ -122,21 +139,8 @@ class Redirect:
 
 
 
-
-integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
-                "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets"]
-structures_vars = ["SIMULATION_TIME", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets",
-                   "n_small_trucks", "n_large_trucks", "speed_s", "capacity_s", "speed_l", "capacity_l"]
-
-proper_names_str = ["Simulation length (h)", "Number of rows and columns", "Min distance between stores", "Max distance between stores", "Number of orders",
-                "Maximum number of pallets in one order", "Number of small trucks", "Number of large trucks", "Speed of small trucks [in units]", "Capacity of small trucks [in pallets]",
-                "Speed of large trucks [in units]", "Capacity of large trucks [in pallets]"]
-
 # Create the main window
 ds_window = App()
-
-mainFrame = tk.Frame(ds_window)
-mainFrame.grid()
 
 # save to json
 def save_json():
@@ -302,24 +306,10 @@ for i in range(len(structures_vars)):
     entry.grid(row=(i//5)*2+1, column=i % 5)
     entries.append(entry)
 
-Grid.rowconfigure(ds_window, 10, weight=1)
-for i in range(0, 6):
-    Grid.columnconfigure(ds_window, i, weight=1)
-    
-# Create a button to get the values from the entries:
-save_values_button = tk.Button(ds_window, text="Next Window", command=save_str_values)
-save_values_button.grid(row=10, column=2, columnspan=1)
-
-upload_from_file_button = tk.Button(ds_window, text="Upload from file", command=upload_from_file)
-upload_from_file_button.grid(row=10, column=3, columnspan=1)
-
-text = tk.Text(ds_window, width=200, height=10)
-text.grid(row=11,columnspan=5, sticky="NSEW")
-
 # -------------------------------------ALGORYTM WINDOW-------------------------------------
 algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent", "uncomplete_sol", "selection_type"]
 integer_alg_vars = ["n_pop", "n_iterations"]
-proper_names_str = ["Number of members in the population", "Number of iterations", "Penalty factor [in units]", "Probability of mutation [0-1]", "Percentage of parents in the population"]
+proper_names_alg = ["Number of members in the population", "Number of iterations", "Penalty factor [in units]", "Probability of mutation [0-1]", "Percentage of parents in the population"]
 
 # Create a function to save the values from the entries
 def save_alg_values():
@@ -418,7 +408,7 @@ def create_alg_window():
     entries_alg = []
     for i in range(len(algorithm_vars)-2):
         # Create a label for the entry
-        label_alg = tk.Label(alg_window, text="{}".format(proper_names_str[i]))
+        label_alg = tk.Label(alg_window, text="{}".format(proper_names_alg[i]))
         label_alg.grid(row=(i//5)*2+1, column=i % 5)
 
         # Create the entry
