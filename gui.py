@@ -94,6 +94,7 @@ class App(tk.Tk):
         self.eval('tk::PlaceWindow . center')
 
         # Create the entries and add them to the window
+        global entries
         entries = []
         for i in range(len(structures_vars)):
             # Create a label for the entry
@@ -118,6 +119,7 @@ class App(tk.Tk):
         upload_from_file_button = tk.Button(self, text="Upload from file", command=upload_from_file)
         upload_from_file_button.grid(row=10, column=3, columnspan=1)
 
+        global text
         text = tk.Text(self, width=200, height=10)
         text.grid(row=11, columnspan=5, sticky="NSEW")
 
@@ -291,20 +293,6 @@ def show_output():
     text.insert('end', output)
 
 
-
-# Create the entries and add them to the window
-entries = []
-for i in range(len(structures_vars)):
-    # Create a label for the entry
-    label = tk.Label(text="{}".format(proper_names_str[i]))
-    label.grid(row=(i//5)*2, column=i % 5)
-
-    # Create the entry
-    entry = tk.Entry(ds_window, width=20)
-    if init_variables is not None:
-        entry.insert(tk.END, init_variables['structures_data'][structures_vars[i]])
-    entry.grid(row=(i//5)*2+1, column=i % 5)
-    entries.append(entry)
 
 # -------------------------------------ALGORYTM WINDOW-------------------------------------
 algorithm_vars = ["n_pop", "n_iterations", "penalty_factor", "r_mutation", "parent_percent", "uncomplete_sol", "selection_type"]
