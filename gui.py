@@ -10,6 +10,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("TkAgg")
+import graph_visualisation
+
 
 integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
                 "n_small_trucks", "n_large_trucks", "rows_cols", "low_adj_matrix", "high_adj_matrix", "n_of_orders", "max_pallets"]
@@ -36,8 +38,12 @@ except FileNotFoundError:
     init_variables = None
 
 
+def next_window():
+    ds_window.destroy_window()
+    create_alg_window()
+
 # Create a function to save the data_structures values from the entries:
-def save_str_values():
+def generate_structures():
         # Create a list to hold the variables
     global variables
     if init_variables is None:
@@ -69,7 +75,9 @@ def save_str_values():
                                                               "deadline": order.deadline, "index": order.index})
 
         save_json()
-        create_alg_window()
+        if variables["structures_data"]["rows_cols"] <= 20:
+            graph_visualisation.graph_visualise(g)
+        
 
 
 # Uploading values from JSON file
@@ -87,6 +95,7 @@ class App(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
+        global mainFrame
         mainFrame = tk.Frame(self)
         mainFrame.grid()
 
@@ -113,12 +122,15 @@ class App(tk.Tk):
             Grid.columnconfigure(self, i, weight=1)
 
         # Create a button to get the values from the entries:
-        save_values_button = tk.Button(self, text="Next Window", command=save_str_values)
-        save_values_button.grid(row=10, column=1, columnspan=1)
+        save_values_button = tk.Button(self, text="Generate Structures", command=generate_structures)
+        save_values_button.grid(row=10, column=0, columnspan=1)
 
         upload_from_file_button = tk.Button(self, text="Upload from file", command=upload_from_file)
-        upload_from_file_button.grid(row=10, column=3, columnspan=1)
+        upload_from_file_button.grid(row=10, column=2, columnspan=1)
 
+        next_window_button = tk.Button(self, text="Next Window", command=next_window)
+        next_window_button.grid(row=10, column=4, columnspan=1)
+        
         global text
         text = tk.Text(self, width=200, height=10)
         text.grid(row=11, columnspan=5, sticky="NSEW")
@@ -126,6 +138,9 @@ class App(tk.Tk):
     def reopen(self):
         self.destroy()
         self.__init__()
+        
+    def destroy_window(self):
+        self.destroy()
 
 
 
@@ -254,6 +269,7 @@ def show_plot():
     y = (height - plot_window.winfo_reqheight()) // 2
     plot_window.geometry(f"+{x}+{y}")
     
+    plt.figure()
     fig, ax = plt.subplots()
     fig.set_size_inches(width/100, height/100, forward=True)
     
@@ -313,6 +329,15 @@ def save_alg_values():
     else:
         get_uncomplete_sol_selection_type()
         save_json()
+    
+
+def go_back():
+    alg_window.destroy()
+    global ds_window
+    # Create the main window
+    ds_window = App()
+
+
     
 def get_uncomplete_sol_selection_type():
     c1_states = c1.state()
@@ -384,6 +409,7 @@ def validate_data_and_append_alg(checked_value, algorithm_var):
         
 
 def create_alg_window():
+    global alg_window
     alg_window = tk.Tk()
     alg_window.title("Algorithm - Set Variables & Results")
     alg_window.focus_force()
@@ -428,22 +454,25 @@ def create_alg_window():
 
 
     r1 = ttk.Radiobutton(alg_window, text="Best Members Selection", variable=selection_type_var, value="selection")
-    r1.grid(row=7, column=1, columnspan=2)
+    r1.grid(row=7, column=0, columnspan=2)
     r2 = ttk.Radiobutton(alg_window, text="Tournament Selection", variable=selection_type_var, value="selection_tour")
-    r2.grid(row=7, column=2, columnspan=2)
+    r2.grid(row=7, column=1, columnspan=2)
     r3 = ttk.Radiobutton(alg_window, text="Roulette Wheel Selection", variable=selection_type_var, value="selection_roulette")
-    r3.grid(row=8, column=1, columnspan=2)
+    r3.grid(row=7, column=2, columnspan=2)
     r4 = ttk.Radiobutton(alg_window, text="Ranking Selection", variable=selection_type_var, value="selection_rank")
-    r4.grid(row=8, column=2, columnspan=2)
+    r4.grid(row=7, column=3, columnspan=2)
     
     save_alg_values_button = tk.Button(alg_window, text="Save Algorithm Parameters", command=save_alg_values)
-    save_alg_values_button.grid(row=10, column=1, columnspan=1)
+    save_alg_values_button.grid(row=10, column=0, columnspan=2)
     # Create a button for running algorithm
     run_algorithm_button = tk.Button(alg_window, text="Run Algorithm", command=run_algorithm)
-    run_algorithm_button.grid(row=10, column=2, columnspan=1)
+    run_algorithm_button.grid(row=10, column=1, columnspan=2)
 
     show_results_button = tk.Button(alg_window, text="Show Plot", command=show_plot)
-    show_results_button.grid(row=10, column=3, columnspan=1)
+    show_results_button.grid(row=10, column=2, columnspan=2)
+    
+    go_back_button = tk.Button(alg_window, text="Go Back to First Window", command=go_back)
+    go_back_button.grid(row=10,column=3, columnspan=2)
 
     global text_alg
     text_alg = tk.Text(alg_window, width=200, height=10)
