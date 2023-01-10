@@ -171,8 +171,7 @@ def validate_data_and_append(checked_value, structure_var):
                     return f'{structure_var} should be non-negative'
                 if int_value + variables['structures_data']['n_small_trucks'] == 0:
                     return f'There should be at least one truck'
-
-            if structure_var == 'low_adj_matrix':
+            elif structure_var == 'low_adj_matrix':
                 if int_value < 0:
                     return f'{structure_var} should be non-negative'
             elif structure_var == 'high_adj_matrix':
@@ -387,6 +386,7 @@ def validate_data_and_append_alg(checked_value, algorithm_var):
 def create_alg_window():
     alg_window = tk.Tk()
     alg_window.title("Algorithm - Set Variables & Results")
+    alg_window.focus_force()
     
     Grid.rowconfigure(alg_window, 10, weight=1)
     for i in range(0, 6):

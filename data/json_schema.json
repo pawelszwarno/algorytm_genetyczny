@@ -3,7 +3,13 @@
   "type": "object",
   "properties": {
     "Graph": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
     },
     "algorithm_data": {
       "type": "object",
