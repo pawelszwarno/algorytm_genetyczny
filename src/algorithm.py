@@ -33,7 +33,7 @@ def objective_function(solution: CompleteSolution, cost_graph: Graph, truck_list
     for j in truck_list:
         j.current_capacity = j.capacity
         j.current_time = 0
-        j.current_pos = 0
+        j.current_pos = -1
     if uncomplete_sol:
         delivered_pallets_in_order = [0 for _ in range(len(order_list))]
     for truck_idx, truck_route in enumerate(solution):
