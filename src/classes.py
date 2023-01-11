@@ -104,7 +104,7 @@ class Truck:
 
         self.current_time = 0
         self.current_capacity = self.capacity
-        self.current_pos = 0
+        self.current_pos = -1
 
     def __repr__(self):
         return f"(ID: {self.index}; type: {self.type})"
@@ -125,7 +125,7 @@ class Truck:
         time = distance_to_base / self.speed
         self.add_time(time)
         self.current_capacity = self.capacity
-        self.current_pos = 0
+        self.current_pos = -1
 
     @classmethod
     def reset_id(cls):
