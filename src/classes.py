@@ -143,7 +143,10 @@ class Graph:
             self.cols = len(matrix[0])
         else:
             self.cols = cols
-        self.matrix = np.array(matrix)
+        if matrix is not None:
+            self.matrix = np.array(matrix)
+        else:
+            self.matrix = None
         self.list_of_vertices = [i for i in range(self.rows)]
         self.min_values = []
 
