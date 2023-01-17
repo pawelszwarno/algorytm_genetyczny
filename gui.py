@@ -1,4 +1,5 @@
 import tkinter as tk
+import src.classes as classes
 from tkinter import messagebox, ttk, filedialog, Grid
 import json
 from jsonschema import validate
@@ -11,6 +12,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("TkAgg")
 import graph_visualisation
+
+
+N_OF_RUNS = 5
 
 
 integer_str_vars = ["SIMULATION_TIME", "capacity_l", "capacity_s",
@@ -29,6 +33,19 @@ json_path = cwd / 'data' / 'variables.json'
 json_schema_path = cwd / 'data' / 'json_schema.json'
 
 
+def generate_structures_from_file(var):
+    classes.Order.simulation_time = var['structures_data']['SIMULATION_TIME']
+    classes.Truck.small_capacity = var['structures_data']['capacity_s']
+    classes.Truck.small_speed = var['structures_data']['speed_s']
+    classes.Truck.large_capacity = var['structures_data']['capacity_l']
+    classes.Truck.large_speed = var['structures_data']['speed_l']
+    global g, trucks_list, orders_lst
+    g = classes.Graph(matrix=var["Graph"])
+    trucks_list = [classes.Truck(truck_type=truck['type'], index=truck['index']) for truck in var["truck_list"]]
+    orders_lst = [classes.Order(n_pallets=order['n_pallets'], vertex=order['vertex'], deadline=order['deadline'], index=order['index']) for order in var['order_lst']]
+
+
+
 with open(json_schema_path) as jf:
     schema = json.load(jf)
 try:
@@ -36,6 +53,13 @@ try:
         init_variables = json.load(f)
 except FileNotFoundError:
     init_variables = None
+    variables = {
+        "structures_data": {},
+        "algorithm_data": {},
+    }
+else:
+    variables = init_variables.copy()
+    generate_structures_from_file(variables)
 
 
 def next_window():
@@ -46,13 +70,6 @@ def next_window():
 def generate_structures():
         # Create a list to hold the variables
     global variables
-    if init_variables is None:
-        variables = {
-                    "structures_data": {},
-                    "algorithm_data": {},
-                }
-    else:
-        variables = init_variables.copy()
     try:
         for idx, entry in enumerate(entries):
             checked_value = entry.get()
@@ -85,11 +102,14 @@ def upload_from_file():
     uploaded_file = filedialog.askopenfile(filetypes=[('JSON file', '*.json')])
     unvalidated_variables = json.load(uploaded_file)
     validate(instance=unvalidated_variables, schema=schema)
-    global variables, init_variables
+    global variables, init_variables, g, trucks_list, orders_lst
+
     variables = unvalidated_variables.copy()
     init_variables = variables.copy()
+    generate_structures_from_file(variables)
     save_json()
     ds_window.reopen()
+
 
 class App(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -245,10 +265,10 @@ def create_struct():
     old_stdout = sys.stdout
 
     sys.stdout = Redirect(text)
-    print("Macierz G: \n {}".format(g))
-    print("Lista zleceń:")
-    for zlecenie in orders_lst:
-        print("{}".format(zlecenie))
+    # print("Macierz G: \n {}".format(g))
+    # print("Lista zleceń:")
+    # for zlecenie in orders_lst:
+    #     print("{}".format(zlecenie))
 
 
     sys.stdout = old_stdout
@@ -257,10 +277,11 @@ def create_struct():
 
     
 def show_plot():
+    global plot_title
     plot_window = tk.Tk()
     plot_window.geometry("800x600")
     plot_window.title("Results and Plot")
-    plot_path = cwd / 'data' / 'wykres_funkcji_celu.png'
+    plot_path = cwd / 'data' / plot_title
     plot_image = Image.open(plot_path)
     
     width = plot_window.winfo_screenwidth()
@@ -288,8 +309,9 @@ def show_plot():
 def run_algorithm():
     # function used in "run algorithm" button
     # that saves the output of main()
-    global output
-    output = main.main(g, trucks_list, orders_lst)
+    global output, variables, g, trucks_list, orders_lst, plot_title
+    plot_title = f"{variables['algorithm_data']['selection_type']}_{variables['algorithm_data']['parent_percent']}_{variables['algorithm_data']['r_mutation']}_{variables['algorithm_data']['uncomplete_sol']}_{variables['algorithm_data']['n_pop']}.png"
+    output = main.main(g, trucks_list, orders_lst, N_OF_RUNS, plot_title)
     text_alg.insert('end', output)
 
 

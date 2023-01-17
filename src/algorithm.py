@@ -248,14 +248,14 @@ def algorithm(variables: Dict, truck_list: List[Truck], order_lst: List[Order], 
     best_eval = objective_function(population[0], g, truck_list, order_lst, variables['algorithm_data']['penalty_factor'], False)
     best_eval_list.append(best_eval)
     iteration_eval_list.append(best_eval)
-    print("Najlepsze rozwiązanie w pierwszej iteracji: ")
-    print(best)
-    print("Wartość funkcji celu w pierwszej iteracji:")
-    print(best_eval)
+    # print("Najlepsze rozwiązanie w pierwszej iteracji: ")
+    # print(best)
+    # print("Wartość funkcji celu w pierwszej iteracji:")
+    # print(best_eval)
     for _ in range(variables['algorithm_data']['n_iterations']):
         children = []
         population_scores = []
-        print(f"ROZMIAR POPULACJI: {variables['algorithm_data']['n_pop']}")
+        # print(f"ROZMIAR POPULACJI: {variables['algorithm_data']['n_pop']}")
         for i in range(variables["algorithm_data"]['n_pop']):
             cost = objective_function(population[i], g, truck_list, order_lst, variables["algorithm_data"]['penalty_factor'], variables["algorithm_data"]['uncomplete_sol'])
             population_scores.append((i, cost))
@@ -277,7 +277,7 @@ def algorithm(variables: Dict, truck_list: List[Truck], order_lst: List[Order], 
             new_child_2 = mutation(child_2, truck_list, variables["algorithm_data"]['r_mutation'])
             children.append(new_child_1)
             children.append(new_child_2)
-        print(best_eval)
+        # print(best_eval)
         
         children_scores = []
         for i in range(len(children)):
@@ -295,14 +295,3 @@ def algorithm(variables: Dict, truck_list: List[Truck], order_lst: List[Order], 
 
 
     return best, best_eval, best_eval_list, iteration_eval_list
-
-
-def visualise(best_eval_list, iteration_eval_list):
-    plt.figure()
-    plt.plot(best_eval_list, label='Najlepsza wartość funkcji celu')
-    plt.plot(iteration_eval_list, label='Wartość funkcji celu w danej iteracji')
-    plt.title('Wykres zależności funkcji celu do iteracji')
-    plt.xlabel('Nr iteracji')
-    plt.ylabel('Wartość funkcji celu')
-    plt.tight_layout() 
-    plt.savefig('data/wykres_funkcji_celu.png', dpi = 100)

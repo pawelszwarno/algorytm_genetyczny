@@ -19,7 +19,7 @@ class Order:
 
     def __init__(
         self,
-        graph,
+        graph=None,
         n_pallets: int = None,
         max_pallets: int = 10,
         vertex: int = None,
@@ -95,10 +95,10 @@ class Truck:
         else:
             self.index = index
 
-        if truck_type == TruckType.SMALL:
+        if self.type == TruckType.SMALL:
             self.speed = self.__class__.small_speed
             self.capacity = self.__class__.small_capacity
-        elif truck_type == TruckType.LARGE:
+        elif self.type == TruckType.LARGE:
             self.speed = self.__class__.large_speed
             self.capacity = self.__class__.large_capacity
 
@@ -143,7 +143,7 @@ class Graph:
             self.cols = len(matrix[0])
         else:
             self.cols = cols
-        self.matrix = matrix
+        self.matrix = np.array(matrix)
         self.list_of_vertices = [i for i in range(self.rows)]
         self.min_values = []
 
