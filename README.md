@@ -2,7 +2,7 @@
 
 Implementacja **algorytmu genetycznego** rozwiązującego zagadnienie transportowe.
 
-## WYMAGANIA
+## WYMAGANIA:
 
 Do korzystania z tej aplikacji niezbędne jest posiadanie zainstalowanego Pythona 3 oraz modułów, zawartych w pliku `requirements.txt`.
 
