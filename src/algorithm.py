@@ -255,7 +255,7 @@ def algorithm(variables: Dict, truck_list: List[Truck], order_lst: List[Order], 
     for _ in range(variables['algorithm_data']['n_iterations']):
         children = []
         population_scores = []
-        print(f"ROZMIAR POPULACJI: {variables['algorithm_data']['n_pop']}")
+        # print(f"ROZMIAR POPULACJI: {variables['algorithm_data']['n_pop']}")
         for i in range(variables["algorithm_data"]['n_pop']):
             cost = objective_function(population[i], g, truck_list, order_lst, variables["algorithm_data"]['penalty_factor'], variables["algorithm_data"]['uncomplete_sol'])
             population_scores.append((i, cost))
